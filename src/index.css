@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;900&display=swap');
+
+@theme {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  --color-primary-950: #172554;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+:root {
+  --orbit-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-blur: blur(12px);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-[#fdfdfd] text-slate-900 leading-relaxed antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-orbit {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+@layer base {
+  /* h1 and h2 from original are removed as new global styles are added */
+}
+
+@layer utilities {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    @apply shadow-glass;
+  }
+
+  .text-gradient {
+    background: var(--orbit-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .bg-orbit {
+    background: var(--orbit-gradient);
+  }
+
+  .orbit-glow {
+    @apply shadow-glow;
+  }
+
+  /* Phone Input Custom Styling */
+  .PhoneInput {
+    @apply flex items-center w-full px-3 py-2 bg-transparent border border-gray-300 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all duration-200;
+  }
+
+  .PhoneInputInput {
+    @apply flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 text-sm ml-2;
+  }
+
+  .PhoneInputCountry {
+    @apply flex items-center mr-2 pr-2 border-r border-gray-200 dark:border-slate-800 self-stretch;
+  }
+
+  .PhoneInputCountrySelectArrow {
+    @apply text-gray-400 dark:text-gray-500 ml-1 opacity-70;
+  }
+
+  .PhoneInputCountryIcon {
+    @apply w-6 h-4 shadow-sm rounded-sm overflow-hidden;
+  }
+}
+
+/* react-phone-number-input specific overrides */
+.PhoneInputCountrySelect {
+  @apply cursor-pointer;
+}
