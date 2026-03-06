@@ -3,14 +3,14 @@ import {
     X, Type, Palette, AlignLeft, AlignCenter,
     AlignRight, Maximize, Trash2, Copy, Settings,
     Sparkles, Info, CheckCircle2, Sliders,
-    Facebook, Instagram, Twitter
+    Facebook, Instagram, Twitter, Upload
 } from 'lucide-react';
 
 export default function PropertyEditor({ activeBlock, updateBlock, removeBlock, duplicateBlock, onClose }) {
     if (!activeBlock) {
         return (
-            <div className="w-80 bg-white/70 backdrop-blur-xl border-l border-slate-100 flex flex-col items-center justify-center p-12 text-center font-outfit">
-                <div className="w-20 h-20 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-400 mb-6 shadow-inner border border-slate-100">
+            <div className="w-full lg:w-80 lg:shrink-0 bg-white/70 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col items-center justify-center p-8 lg:p-12 text-center font-outfit min-h-[200px] lg:min-h-0 lg:h-full">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-400 mb-4 lg:mb-6 shadow-inner border border-slate-100">
                     <Sliders size={32} strokeWidth={1.5} />
                 </div>
                 <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em] mb-4">Orbit Offline</h4>
@@ -30,8 +30,8 @@ export default function PropertyEditor({ activeBlock, updateBlock, removeBlock, 
     };
 
     return (
-        <div className="w-80 bg-white/70 backdrop-blur-xl border-l border-slate-100 flex flex-col h-full animate-in slide-in-from-right duration-500 font-outfit">
-            <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-white/50">
+        <div className="w-full lg:w-80 lg:shrink-0 bg-white/70 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col lg:h-full animate-in slide-in-from-bottom lg:slide-in-from-right duration-500 font-outfit min-h-[400px] lg:min-h-0">
+            <div className="p-6 lg:p-8 border-b border-slate-50 flex items-center justify-between bg-white/50 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="p-2.5 bg-primary-600 rounded-xl text-white shadow-lg shadow-primary-500/20">
                         <Settings size={18} />
@@ -215,6 +215,29 @@ export default function PropertyEditor({ activeBlock, updateBlock, removeBlock, 
                             </div>
 
                             <div className="space-y-3 pt-4 border-t border-slate-50">
+                                <div className="flex items-center justify-between px-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Unsubscribe Link</span>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            checked={content.showUnsubscribe !== false}
+                                            onChange={(e) => handleContentChange({ showUnsubscribe: e.target.checked })}
+                                        />
+                                        <div className="w-7 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-500"></div>
+                                    </label>
+                                </div>
+                                {content.showUnsubscribe !== false && (
+                                    <input
+                                        className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl text-[11px] font-black text-slate-900 shadow-inner"
+                                        value={content.unsubscribeText !== undefined ? content.unsubscribeText : 'Unsubscribe from this frequency'}
+                                        onChange={(e) => handleContentChange({ unsubscribeText: e.target.value })}
+                                        placeholder="Unsubscribe Text"
+                                    />
+                                )}
+                            </div>
+
+                            <div className="space-y-3 pt-4 border-t border-slate-50">
                                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Social Links</span>
                                 <div className="space-y-3">
                                     <div className="flex gap-2 items-center">
@@ -299,8 +322,33 @@ export default function PropertyEditor({ activeBlock, updateBlock, removeBlock, 
                                 <input
                                     className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl text-[11px] font-bold text-slate-600 shadow-inner"
                                     value={content.src}
+                                    placeholder="Enter image URL"
                                     onChange={(e) => handleContentChange({ src: e.target.value })}
                                 />
+                                <div className="flex items-center gap-3 py-1">
+                                    <div className="h-px bg-slate-200 flex-1"></div>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">OR</span>
+                                    <div className="h-px bg-slate-200 flex-1"></div>
+                                </div>
+                                <label className="flex items-center justify-center gap-2 w-full p-3 bg-white border border-primary-200 text-primary-600 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-primary-50 hover:border-primary-300 transition-all shadow-sm">
+                                    <Upload size={14} />
+                                    Upload Media
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => {
+                                                    handleContentChange({ src: reader.result });
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                </label>
                             </div>
                             <div className="space-y-3">
                                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Sector Radius</span>
@@ -344,7 +392,7 @@ export default function PropertyEditor({ activeBlock, updateBlock, removeBlock, 
                 )}
             </div>
 
-            <div className="p-8 border-t border-slate-50 bg-white/50 backdrop-blur-md">
+            <div className="p-8 border-t border-slate-50 bg-white/50 backdrop-blur-md shrink-0">
                 <button
                     onClick={onClose}
                     className="w-full py-4 bg-primary-600 text-white rounded-[20px] font-black text-[11px] uppercase tracking-[0.3em] hover:bg-primary-700 shadow-xl shadow-primary-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group"

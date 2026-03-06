@@ -57,7 +57,7 @@ export default function Register() {
                                 BO
                             </div>
                             <div className="flex flex-col">
-                                <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Bostechei</h1>
+                                <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Bostechie</h1>
                                 <span className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em] mt-1">Orbit</span>
                             </div>
                         </div>

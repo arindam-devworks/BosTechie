@@ -1,15 +1,21 @@
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { LogOut, Bell, Sun, Moon } from 'lucide-react';
+import { LogOut, Bell, Sun, Moon, Menu } from 'lucide-react';
 
 export default function Header({ toggleSidebar }) {
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
 
     return (
-        <header className="h-20 glass-card mx-6 my-4 rounded-3xl flex items-center justify-between px-8 z-30 transition-all duration-500 ease-in-out">
-            <div className="flex items-center">
-                <div className="flex flex-col">
+        <header className="h-20 glass-card mx-4 lg:mx-6 my-4 rounded-3xl flex items-center justify-between px-4 lg:px-8 z-30 transition-all duration-500 ease-in-out shrink-0">
+            <div className="flex items-center gap-3 lg:gap-0">
+                <button
+                    onClick={toggleSidebar}
+                    className="lg:hidden p-2 rounded-xl text-gray-500 hover:bg-white hover:text-gray-900 transition-all duration-300"
+                >
+                    <Menu size={24} />
+                </button>
+                <div className="flex flex-col hidden sm:flex">
                     <span className="text-[10px] font-black text-primary-500 uppercase tracking-[0.3em] leading-none mb-1">Orbit Terminal</span>
                     <h2 className="text-lg font-black text-gray-900 uppercase tracking-tighter leading-none">Console Overview</h2>
                 </div>

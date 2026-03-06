@@ -50,7 +50,7 @@ export default function Login() {
                                 BO
                             </div>
                             <div className="flex flex-col">
-                                <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Bostechei</h1>
+                                <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Bostechie</h1>
                                 <span className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em] mt-1">Orbit</span>
                             </div>
                         </div>
@@ -172,7 +172,7 @@ export default function Login() {
 
             {/* Footer */}
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-8">
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">© 2026 Bostechei</span>
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">© 2026 Bostechie</span>
                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Orbit Platform</span>
             </div>
         </div>

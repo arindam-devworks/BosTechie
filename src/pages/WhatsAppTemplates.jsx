@@ -101,7 +101,7 @@ export default function WhatsAppTemplates() {
                                         <MessageSquare size={20} />
                                     </div>
                                     <div className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest items-center flex gap-1 ${template.status === 'approved' ? 'bg-emerald-50 text-emerald-600' :
-                                            template.status === 'pending' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'
+                                        template.status === 'pending' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'
                                         }`}>
                                         {template.status === 'approved' ? <CheckCircle2 size={10} /> : <Clock size={10} />}
                                         {template.status}
@@ -145,7 +145,7 @@ export default function WhatsAppTemplates() {
                                 <div className="p-4 bg-[#075e54] text-white flex items-center gap-3 pt-8">
                                     <div className="w-8 h-8 rounded-full bg-white/20"></div>
                                     <div>
-                                        <p className="text-sm font-bold leading-none">Bostechei Orbit</p>
+                                        <p className="text-sm font-bold leading-none">Bostechie Orbit</p>
                                         <p className="text-[10px] opacity-70">Official Business Account</p>
                                     </div>
                                 </div>
@@ -155,7 +155,7 @@ export default function WhatsAppTemplates() {
                                     <div className="max-w-[85%] bg-white rounded-2xl rounded-tl-none p-3 shadow-sm relative">
                                         <p className="text-[12px] text-slate-700 leading-relaxed font-outfit">
                                             Hey there! 👋 <br />
-                                            Welcome to the **Bostechei Orbit** transmission sector. Your sync is now active.
+                                            Welcome to the **Bostechie Orbit** transmission sector. Your sync is now active.
                                         </p>
                                         <p className="text-[9px] text-slate-400 text-right mt-1">12:00 PM</p>
                                         <div className="absolute top-0 left-[-6px] border-[6px] border-transparent border-t-white"></div>

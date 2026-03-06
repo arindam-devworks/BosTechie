@@ -120,22 +120,22 @@ export default function Contacts() {
                     />
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                    <div className="flex p-1 bg-slate-100/50 rounded-xl border border-slate-100/50">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+                    <div className="flex justify-center p-1 bg-slate-100/50 rounded-xl border border-slate-100/50">
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 sm:flex-none flex justify-center p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             <ListIcon size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('grid')}
-                            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 sm:flex-none flex justify-center p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             <LayoutGrid size={18} />
                         </button>
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-3 text-[11px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">
+                    <button className="flex justify-center items-center gap-2 px-4 py-3 bg-white sm:bg-transparent border border-slate-100 sm:border-transparent rounded-xl text-[11px] font-black text-slate-500 sm:text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">
                         <Filter size={16} />
                         Advanced Ops
                     </button>
@@ -317,8 +317,8 @@ export default function Contacts() {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit(handleSave)} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                            <div className="grid grid-cols-2 gap-6">
+                        <form onSubmit={handleSubmit(handleSave)} className="p-6 lg:p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Entity Name</label>
                                     <input
@@ -340,7 +340,7 @@ export default function Contacts() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Comms Protocol (Phone)</label>
                                     <Controller

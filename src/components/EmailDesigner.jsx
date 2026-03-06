@@ -35,7 +35,7 @@ export const DEFAULT_STYLES = {
 export const DEFAULT_CONTENT = {
     navbar: {
         logoText: 'BO',
-        companyName: 'Bostechei Orbit',
+        companyName: 'Bostechie Orbit',
         links: [
             { label: 'DEVICES', url: '#' },
             { label: 'FLEET', url: '#' },
@@ -47,14 +47,16 @@ export const DEFAULT_CONTENT = {
     button: { label: 'Initialize Objective', url: '#' },
     products: { title: 'Fleet Inventory' },
     footer: {
-        address: 'Orbit Sector 7G | Bostechei Terminal',
-        message: 'You are synchronized with this sequence because you are a verified Bostechei Entity.',
-        copyright: '© 2026 BOSTECHEI ORBIT COMMAND',
+        address: 'Orbit Sector 7G | Bostechie Terminal',
+        message: 'You are synchronized with this sequence because you are a verified Bostechie Entity.',
+        copyright: '© 2026 BOSTECHIE ORBIT COMMAND',
         socialLinks: {
             facebook: '#',
             instagram: '#',
             twitter: '#'
-        }
+        },
+        showUnsubscribe: true,
+        unsubscribeText: 'Unsubscribe from this frequency'
     }
 };
 
@@ -158,13 +160,13 @@ export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setAct
     };
 
     return (
-        <div className="flex-1 flex overflow-hidden bg-[#fcfcfd] font-outfit">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#fcfcfd] font-outfit min-h-0">
             <BlockLibrary onAddBlock={addBlock} />
 
-            <div className="flex-1 flex flex-col min-w-0 relative">
+            <div className="flex-1 flex flex-col min-h-[600px] lg:min-h-0 min-w-0 relative border-y lg:border-y-0 lg:border-x border-slate-100">
                 {/* Designer Toolbar: Command Strip */}
-                <div className="h-14 border-b border-slate-100 bg-white/70 backdrop-blur-md flex items-center justify-between px-8 shrink-0 z-30 shadow-sm">
-                    <div className="flex items-center gap-6">
+                <div className="h-auto min-h-14 py-3 lg:py-0 border-b border-slate-100 bg-white/70 backdrop-blur-md flex flex-wrap items-center justify-between px-4 lg:px-8 shrink-0 z-30 shadow-sm gap-4">
+                    <div className="flex items-center gap-4 lg:gap-6 flex-wrap">
                         <div className="flex items-center gap-1.5 bg-slate-100/50 rounded-xl p-1 border border-slate-100">
                             <button
                                 onClick={undo}

@@ -50,7 +50,7 @@ export function SortableBlock({ id, block, isActive, onClick, onRemove, onDuplic
                                 {content.logoText || 'BO'}
                             </div>
                             <span className="font-black tracking-tighter text-sm uppercase">
-                                {content.companyName || 'BOSTECHEI ORBIT'}
+                                {content.companyName || 'BOSTECHIE ORBIT'}
                             </span>
                         </div>
                         <div className="flex gap-6 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">
@@ -154,8 +154,15 @@ export function SortableBlock({ id, block, isActive, onClick, onRemove, onDuplic
                                 {content.message || 'System transmission verified.'}
                             </p>
                         </div>
-                        <div className="mt-12 pt-8 border-t border-slate-100 text-[10px] font-black opacity-40 uppercase tracking-[0.5em]">
-                            {content.copyright || '© 2026 ORBIT COMMAND'}
+                        <div className="mt-12 pt-8 border-t border-slate-100/50 flex flex-col gap-4 items-center">
+                            {content.showUnsubscribe !== false && (
+                                <a href="#" className="text-[10px] font-bold text-primary-500 hover:text-primary-400 underline decoration-primary-500/30 underline-offset-4 transition-colors">
+                                    {content.unsubscribeText || 'Unsubscribe from this frequency'}
+                                </a>
+                            )}
+                            <div className="text-[10px] font-black opacity-40 uppercase tracking-[0.5em]">
+                                {content.copyright || '© 2026 ORBIT COMMAND'}
+                            </div>
                         </div>
                     </div>
                 );

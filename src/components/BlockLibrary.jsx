@@ -19,17 +19,17 @@ export const BLOCKS = [
 
 export default function BlockLibrary({ onAddBlock }) {
     return (
-        <div className="w-80 bg-white/70 backdrop-blur-xl border-r border-slate-100 flex flex-col h-full z-10 font-outfit">
-            <div className="p-8 border-b border-slate-50">
-                <div className="flex items-center gap-3 mb-2">
+        <div className="w-full lg:w-80 lg:shrink-0 bg-white/70 backdrop-blur-xl border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-col lg:h-full z-10 font-outfit max-h-[300px] lg:max-h-none">
+            <div className="p-4 lg:p-8 border-b border-slate-50 shrink-0">
+                <div className="flex items-center gap-3 mb-1 lg:mb-2">
                     <Sparkles className="text-primary-500" size={16} />
                     <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em]">Block Forge</h3>
                 </div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-7">Deployment Units</p>
+                <p className="hidden lg:block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-7">Deployment Units</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-8">
-                <div className="grid grid-cols-2 gap-4">
+            <div className="flex-1 overflow-y-auto p-4 lg:p-6 custom-scrollbar space-y-6 lg:space-y-8">
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-2 gap-3 lg:gap-4">
                     {BLOCKS.map((block) => (
                         <button
                             key={block.type}
