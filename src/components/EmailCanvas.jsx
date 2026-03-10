@@ -198,8 +198,8 @@ export function SortableBlock({ id, block, isActive, onClick, onRemove, onDuplic
             style={style}
             onClick={(e) => { e.stopPropagation(); onClick(); }}
             className={cn(
-                "relative group/block cursor-default transition-all duration-500 ring-offset-8 bg-white",
-                isActive ? "ring-2 ring-primary-500 shadow-[0_40px_80px_-20px_rgba(37,99,235,0.25)] z-20 scale-[1.01]" : "hover:ring-2 hover:ring-primary-100 hover:shadow-xl",
+                "relative group/block cursor-default transition-all duration-500 ring-offset-8 bg-white dark:bg-slate-900 dark:ring-offset-slate-950",
+                isActive ? "ring-2 ring-primary-500 shadow-[0_40px_80px_-20px_rgba(37,99,235,0.25)] z-20 scale-[1.01]" : "hover:ring-2 hover:ring-primary-100 dark:hover:ring-primary-900/50 hover:shadow-xl",
                 isDragging && "opacity-50 scale-105"
             )}
         >
@@ -211,19 +211,19 @@ export function SortableBlock({ id, block, isActive, onClick, onRemove, onDuplic
                 <div
                     {...attributes}
                     {...listeners}
-                    className="w-11 h-11 bg-white shadow-2xl rounded-2xl text-slate-500 hover:text-primary-600 cursor-grab active:cursor-grabbing border border-slate-100 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                    className="w-11 h-11 bg-white dark:bg-slate-800 shadow-2xl rounded-2xl text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 cursor-grab active:cursor-grabbing border border-slate-100 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
                 >
                     <GripVertical size={18} />
                 </div>
                 <button
                     onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
-                    className="w-11 h-11 bg-white shadow-2xl rounded-2xl text-slate-500 hover:text-primary-600 border border-slate-100 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                    className="w-11 h-11 bg-white dark:bg-slate-800 shadow-2xl rounded-2xl text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 border border-slate-100 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
                 >
                     <Copy size={18} />
                 </button>
                 <button
                     onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                    className="w-11 h-11 bg-white shadow-2xl rounded-2xl text-red-400 hover:text-red-500 border border-slate-100 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                    className="w-11 h-11 bg-white dark:bg-slate-800 shadow-2xl rounded-2xl text-red-400 dark:text-red-500 hover:text-red-500 dark:hover:text-red-400 border border-slate-100 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
                 >
                     <Trash2 size={18} />
                 </button>
@@ -248,8 +248,8 @@ export function SortableBlock({ id, block, isActive, onClick, onRemove, onDuplic
 export default function EmailCanvas({ blocks, activeBlockId, setActiveBlockId, onRemoveBlock, onDuplicateBlock, previewMode }) {
     return (
         <div className={cn(
-            "flex-1 overflow-y-auto p-12 lg:p-24 flex justify-center bg-[#f8f9fb] transition-all duration-1000 custom-scrollbar perspective-2000 relative",
-            previewMode === 'mobile' && "bg-slate-200"
+            "flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 xl:p-24 flex justify-center bg-[#f8f9fb] dark:bg-[#0b0f19] transition-all duration-1000 custom-scrollbar perspective-2000 relative",
+            previewMode === 'mobile' && "bg-slate-200 dark:bg-slate-800/80 p-4"
         )}>
             {/* Decorative background elements */}
             <div className="absolute top-20 left-20 w-64 h-64 bg-primary-100/30 rounded-full blur-[100px] pointer-events-none"></div>
@@ -257,22 +257,22 @@ export default function EmailCanvas({ blocks, activeBlockId, setActiveBlockId, o
 
             <div
                 className={cn(
-                    "bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.12),0_0_1px_rgba(0,0,0,0.1)] min-h-[calc(100vh-20rem)] relative flex flex-col transition-all duration-1000 origin-top transform-gpu",
-                    previewMode === 'mobile' ? "w-[390px] rounded-[48px] border-[12px] border-slate-900 shadow-2xl" : "w-[640px] rounded-[4px]"
+                    "bg-white dark:bg-slate-900 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.12),0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] min-h-[calc(100vh-10rem)] relative flex flex-col transition-all duration-1000 origin-top transform-gpu",
+                    previewMode === 'mobile' ? "w-full max-w-[390px] rounded-[48px] border-[12px] border-slate-900 dark:border-white/10 shadow-2xl" : "w-full lg:max-w-[640px] xl:max-w-[700px] rounded-[4px]"
                 )}
                 onClick={() => setActiveBlockId(null)}
             >
                 {blocks.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center border-4 border-dashed border-slate-100 m-16 rounded-[40px] group hover:border-primary-200 transition-all duration-500 bg-slate-50/30">
-                        <div className="w-24 h-24 bg-white shadow-xl rounded-[32px] flex items-center justify-center text-slate-300 mb-8 group-hover:text-primary-400 group-hover:shadow-primary-500/10 transition-all scale-100 group-hover:scale-110 group-hover:rotate-6">
+                    <div className="flex-1 flex flex-col items-center justify-center border-4 border-dashed border-slate-100 dark:border-slate-800 m-16 rounded-[40px] group hover:border-primary-200 transition-all duration-500 bg-slate-50/30 dark:bg-slate-900/30">
+                        <div className="w-24 h-24 bg-white dark:bg-slate-800 shadow-xl rounded-[32px] flex items-center justify-center text-slate-300 dark:text-slate-600 mb-8 group-hover:text-primary-400 group-hover:shadow-primary-500/10 transition-all scale-100 group-hover:scale-110 group-hover:rotate-6">
                             <Mail size={48} strokeWidth={1} />
                         </div>
-                        <p className="text-slate-900 font-black text-xs uppercase tracking-[0.4em]">Canvas Offline</p>
+                        <p className="text-slate-900 dark:text-white font-black text-xs uppercase tracking-[0.4em]">Canvas Offline</p>
                         <p className="text-[10px] text-slate-500 mt-4 uppercase tracking-[0.2em] font-bold">Inject Deployment Units to Begin</p>
                         <div className="mt-8 flex gap-2">
-                            <div className="w-2 h-2 rounded-full bg-slate-200"></div>
-                            <div className="w-2 h-2 rounded-full bg-slate-200"></div>
-                            <div className="w-2 h-2 rounded-full bg-slate-200"></div>
+                            <div className="w-2 h-2 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                            <div className="w-2 h-2 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                            <div className="w-2 h-2 rounded-full bg-slate-200 dark:bg-slate-700"></div>
                         </div>
                     </div>
                 ) : (
@@ -292,8 +292,8 @@ export default function EmailCanvas({ blocks, activeBlockId, setActiveBlockId, o
                 )}
 
                 {/* Canvas End Marker */}
-                <div className="h-32 bg-slate-50/30 border-t border-dashed border-slate-100 flex items-center justify-center opacity-60">
-                    <div className="flex items-center gap-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.5em]">
+                <div className="h-32 bg-slate-50/30 dark:bg-slate-900/30 border-t border-dashed border-slate-100 dark:border-slate-800 flex items-center justify-center opacity-60">
+                    <div className="flex items-center gap-4 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.5em]">
                         <Command size={14} className="opacity-70" />
                         TERMINAL END SEQUENCE
                         <ShieldCheck size={14} className="opacity-70" />

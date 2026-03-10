@@ -1,19 +1,56 @@
 import { z } from 'zod';
+import { PATTERNS, MESSAGES } from './patterns';
 
 export const registerSchema = z.object({
-    firstName: z.string().min(1, 'First Name is required').max(50, 'First Name cannot exceed 50 characters'),
-    lastName: z.string().min(1, 'Last Name is required').max(50, 'Last Name cannot exceed 50 characters'),
-    companyName: z.string().min(1, 'Company Name is required').max(100, 'Company Name cannot exceed 100 characters'),
-    email: z.string().email('Valid email is required'),
-    phone: z.string().max(18, 'Phone cannot exceed 18 characters'),
-    password: z.string()
-        .min(8, 'Password must be at least 8 characters')
-        .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-        .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-        .regex(/[0-9]/, 'Password must contain at least one number')
-        .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-    confirmPassword: z.string(),
+    firstName: z
+        .string()
+        .min(1, MESSAGES.firstName.required)
+        .min(2, MESSAGES.firstName.min)
+        .max(50, MESSAGES.firstName.max)
+        .regex(PATTERNS.NAME, MESSAGES.firstName.pattern)
+        .transform((v) => v.trim()),
+
+    lastName: z
+        .string()
+        .min(1, MESSAGES.lastName.required)
+        .min(2, MESSAGES.lastName.min)
+        .max(50, MESSAGES.lastName.max)
+        .regex(PATTERNS.NAME, MESSAGES.lastName.pattern)
+        .transform((v) => v.trim()),
+
+    companyName: z
+        .string()
+        .min(1, MESSAGES.companyName.required)
+        .min(2, MESSAGES.companyName.min)
+        .max(100, MESSAGES.companyName.max)
+        .regex(PATTERNS.COMPANY, MESSAGES.companyName.pattern)
+        .transform((v) => v.trim()),
+
+    email: z
+        .string()
+        .min(1, MESSAGES.email.required)
+        .max(254, MESSAGES.email.max)
+        .regex(PATTERNS.EMAIL, MESSAGES.email.format)
+        .toLowerCase()
+        .transform((v) => v.trim()),
+
+    phone: z
+        .string()
+        .min(1, MESSAGES.phone.required)
+        .regex(PATTERNS.PHONE, MESSAGES.phone.format),
+
+    password: z
+        .string()
+        .min(1, MESSAGES.password.required)
+        .min(8, MESSAGES.password.min)
+        .max(64, MESSAGES.password.max)
+        .regex(PATTERNS.PASSWORD, MESSAGES.password.pattern),
+
+    confirmPassword: z
+        .string()
+        .min(1, MESSAGES.confirmPassword.required),
+
 }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
+    message: MESSAGES.confirmPassword.match,
+    path: ['confirmPassword'],
 });

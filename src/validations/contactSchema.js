@@ -3,7 +3,7 @@ import { isValidPhoneNumber } from 'libphonenumber-js';
 
 export const contactSchema = z.object({
     name: z.string().min(1, 'Name is required').max(50, 'Name cannot exceed 50 characters'),
-    email: z.string().email('Invalid email').max(50, 'Email cannot exceed 50 characters'),
+    email: z.string().email('Invalid email').max(50, 'Email cannot exceed 50 characters').toLowerCase(),
     phone: z.string()
         .max(18, 'Phone cannot exceed 18 characters')
         .refine((val) => !val || isValidPhoneNumber(val), {

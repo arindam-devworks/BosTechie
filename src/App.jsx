@@ -16,6 +16,7 @@ import Inbox from './pages/Inbox';
 import Settings from './pages/Settings';
 import EmailTemplates from './pages/EmailTemplates';
 import WhatsAppTemplates from './pages/WhatsAppTemplates';
+import WhatsAppTemplateBuilder from './pages/WhatsAppTemplateBuilder';
 import CampaignHistory from './pages/CampaignHistory';
 import Analytics from './pages/Analytics';
 
@@ -40,6 +41,7 @@ function App() {
                 <Route path="/inbox" element={<Inbox />} />
                 <Route path="/templates" element={<EmailTemplates />} />
                 <Route path="/whatsapp-templates" element={<WhatsAppTemplates />} />
+                <Route path="/whatsapp-templates/create" element={<WhatsAppTemplateBuilder />} />
                 <Route path="/history" element={<CampaignHistory />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
@@ -51,5 +53,4 @@ function App() {
     </ThemeProvider>
   );
 }
-
 export default App;

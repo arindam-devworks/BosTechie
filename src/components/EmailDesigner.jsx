@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -62,6 +62,9 @@ export const DEFAULT_CONTENT = {
 
 export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setActiveBlockId }) {
     const [previewMode, setPreviewMode] = useState('desktop');
+    const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
+    const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+    const [focusMode, setFocusMode] = useState(false);
 
     // History for Undo/Redo
     const [history, setHistory] = useState([]);
@@ -71,6 +74,45 @@ export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setAct
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
+
+    // Handle responsive auto-collapse
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 1200) {
+                setLeftPanelCollapsed(true);
+                setRightPanelCollapsed(true);
+            } else {
+                setLeftPanelCollapsed(false);
+                setRightPanelCollapsed(false);
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Ensure only one side panel is open on medium screens
+    const toggleLeftPanel = () => {
+        if (!leftPanelCollapsed) {
+            setLeftPanelCollapsed(true);
+        } else {
+            setLeftPanelCollapsed(false);
+            if (window.innerWidth < 1200) {
+                setRightPanelCollapsed(true);
+            }
+        }
+    };
+
+    const toggleRightPanel = () => {
+        if (!rightPanelCollapsed) {
+            setRightPanelCollapsed(true);
+        } else {
+            setRightPanelCollapsed(false);
+            if (window.innerWidth < 1200) {
+                setLeftPanelCollapsed(true);
+            }
+        }
+    };
 
     const saveToHistory = useCallback((currentBlocks) => {
         const newHistory = history.slice(0, historyStep + 1);
@@ -107,7 +149,19 @@ export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setAct
         setBlocks(newBlocks);
         setActiveBlockId(newBlock.id);
         saveToHistory(newBlocks);
+
+        // Auto-open right panel when a block is added
+        setRightPanelCollapsed(false);
+        if (window.innerWidth < 1200) setLeftPanelCollapsed(true);
     };
+
+    // Auto-open property editor when a block is selected
+    useEffect(() => {
+        if (activeBlockId) {
+            setRightPanelCollapsed(false);
+            if (window.innerWidth < 1200) setLeftPanelCollapsed(true);
+        }
+    }, [activeBlockId]);
 
     const updateBlock = (id, updates) => {
         const newBlocks = blocks.map(b => b.id === id ? {
@@ -143,10 +197,11 @@ export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setAct
 
     const handleDragEnd = (event) => {
         const { active, over } = event;
-        if (active.id !== over.id) {
+        if (active && over && active.id !== over.id) {
             setBlocks((items) => {
                 const oldIndex = items.findIndex(i => i.id === active.id);
                 const newIndex = items.findIndex(i => i.id === over.id);
+                if (oldIndex === -1 || newIndex === -1) return items;
                 const newItems = arrayMove(items, oldIndex, newIndex);
                 saveToHistory(newItems);
                 return newItems;
@@ -160,19 +215,39 @@ export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setAct
     };
 
     return (
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#fcfcfd] font-outfit min-h-0">
-            <BlockLibrary onAddBlock={addBlock} />
+        <div className={`flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#fcfcfd] dark:bg-[#0b0f19] font-outfit min-h-0 relative ${focusMode ? 'z-50' : ''}`}>
 
-            <div className="flex-1 flex flex-col min-h-[600px] lg:min-h-0 min-w-0 relative border-y lg:border-y-0 lg:border-x border-slate-100">
+            {/* Sidebar Toggles (Visible on medium/small screens) */}
+            <div className="lg:hidden absolute top-20 left-4 z-40 flex flex-col gap-3">
+                <button
+                    onClick={toggleLeftPanel}
+                    className="w-10 h-10 bg-white dark:bg-slate-800 shadow-xl rounded-xl flex items-center justify-center text-primary-600 dark:text-primary-400 border border-slate-100 dark:border-slate-700 transition-all hover:scale-110"
+                >
+                    <Layers size={18} />
+                </button>
+            </div>
+
+            <div className="lg:hidden absolute top-20 right-4 z-40 flex flex-col gap-3">
+                <button
+                    onClick={toggleRightPanel}
+                    className="w-10 h-10 bg-white dark:bg-slate-800 shadow-xl rounded-xl flex items-center justify-center text-primary-600 dark:text-primary-400 border border-slate-100 dark:border-slate-700 transition-all hover:scale-110"
+                >
+                    <Monitor size={18} />
+                </button>
+            </div>
+
+            <BlockLibrary onAddBlock={addBlock} isCollapsed={leftPanelCollapsed} onToggle={() => setLeftPanelCollapsed(!leftPanelCollapsed)} />
+
+            <div className="flex-1 flex flex-col min-h-[600px] lg:min-h-0 min-w-0 relative border-y lg:border-y-0 lg:border-x border-slate-100 dark:border-slate-800 transition-all duration-500">
                 {/* Designer Toolbar: Command Strip */}
-                <div className="h-auto min-h-14 py-3 lg:py-0 border-b border-slate-100 bg-white/70 backdrop-blur-md flex flex-wrap items-center justify-between px-4 lg:px-8 shrink-0 z-30 shadow-sm gap-4">
+                <div className="h-auto min-h-14 py-3 lg:py-0 border-b border-slate-100 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md flex flex-wrap items-center justify-between px-4 lg:px-8 shrink-0 z-30 shadow-sm gap-4">
                     <div className="flex items-center gap-4 lg:gap-6 flex-wrap">
-                        <div className="flex items-center gap-1.5 bg-slate-100/50 rounded-xl p-1 border border-slate-100">
+                        <div className="flex items-center gap-1.5 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl p-1 border border-slate-100 dark:border-slate-700/50">
                             <button
                                 onClick={undo}
                                 disabled={historyStep <= 0}
                                 title="Undo Transmission"
-                                className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg text-slate-500 hover:text-primary-600 transition-all disabled:opacity-20"
+                                className="w-8 h-8 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all disabled:opacity-20"
                             >
                                 <Undo2 size={16} />
                             </button>
@@ -180,46 +255,50 @@ export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setAct
                                 onClick={redo}
                                 disabled={historyStep >= history.length - 1}
                                 title="Redo Transmission"
-                                className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg text-slate-500 hover:text-primary-600 transition-all disabled:opacity-20"
+                                className="w-8 h-8 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all disabled:opacity-20"
                             >
                                 <Redo2 size={16} />
                             </button>
                         </div>
 
-                        <div className="h-5 w-px bg-slate-200"></div>
+                        <div className="h-5 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
 
-                        <div className="flex items-center gap-1.5 bg-slate-100/50 rounded-xl p-1 border border-slate-100">
+                        <div className="flex items-center gap-1.5 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl p-1 border border-slate-100 dark:border-slate-700/50">
                             <button
                                 onClick={() => setPreviewMode('desktop')}
-                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${previewMode === 'desktop' ? 'bg-white shadow-md text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${previewMode === 'desktop' ? 'bg-white dark:bg-slate-700 shadow-md text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                             >
                                 <Monitor size={16} />
                             </button>
                             <button
                                 onClick={() => setPreviewMode('mobile')}
-                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${previewMode === 'mobile' ? 'bg-white shadow-md text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${previewMode === 'mobile' ? 'bg-white dark:bg-slate-700 shadow-md text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                             >
                                 <Smartphone size={16} />
                             </button>
                         </div>
 
-                        <div className="h-5 w-px bg-slate-200"></div>
+                        <div className="h-5 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
 
                         <button
-                            onClick={handleSaveTemplate}
-                            className="flex items-center gap-2.5 px-5 py-2 bg-primary-50 text-primary-600 rounded-xl border border-primary-100 hover:bg-primary-100 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm hover:shadow-primary-500/10"
+                            onClick={() => setFocusMode(!focusMode)}
+                            className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border transition-all text-[10px] font-black uppercase tracking-widest ${focusMode ? 'bg-primary-600 text-white border-primary-500 shadow-lg shadow-primary-500/20' : 'bg-slate-100/50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-700 hover:text-primary-600 dark:hover:text-primary-400'}`}
                         >
-                            <Download size={14} /> Sync Template
+                            <Sparkles size={14} className={focusMode ? 'animate-pulse' : ''} />
+                            {focusMode ? 'Exit Command Mode' : 'Focus Mode'}
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">Transmission Protocol</span>
-                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">V4.0.2-BETA</span>
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-primary-500">
-                            <ShieldCheck size={18} />
+                    <div className="flex items-center gap-3 ml-auto lg:ml-0">
+                        <button
+                            onClick={handleSaveTemplate}
+                            className="hidden lg:flex items-center gap-2.5 px-5 py-2 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-xl border border-primary-100 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-800/40 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm hover:shadow-primary-500/10"
+                        >
+                            <Download size={14} /> Sync Template
+                        </button>
+                        <div className="hidden sm:flex flex-col items-end">
+                            <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Transmission Protocol</span>
+                            <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">V4.0.2-BETA</span>
                         </div>
                     </div>
                 </div>
@@ -253,6 +332,8 @@ export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setAct
                 removeBlock={removeBlock}
                 duplicateBlock={duplicateBlock}
                 onClose={() => setActiveBlockId(null)}
+                isCollapsed={rightPanelCollapsed}
+                onToggle={() => setRightPanelCollapsed(!rightPanelCollapsed)}
             />
         </div>
     );

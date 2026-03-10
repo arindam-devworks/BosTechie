@@ -33,37 +33,37 @@ export default function ResetPassword() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
             <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-violet-500/10 rounded-full blur-[120px]"></div>
 
             <div className="w-full max-w-[500px] glass-card rounded-[40px] p-10 lg:p-16 relative z-10">
                 <div className="text-center mb-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 text-[10px] font-black text-violet-600 uppercase tracking-widest mb-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 dark:bg-violet-900/20 text-[10px] font-black text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-4">
                         <ShieldAlert size={12} />
                         Override Sequence
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter mb-2">Reset Secret Key</h3>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">Establish a new orbital access key</p>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Reset Secret Key</h3>
+                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">Establish a new orbital access key</p>
                 </div>
 
                 {!success ? (
                     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                         <div className="space-y-2">
-                            <label className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">New Secret Key</label>
+                            <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] ml-1">New Secret Key</label>
                             <div className="relative group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors">
                                     <Lock size={18} />
                                 </div>
                                 <input
                                     {...register('password')}
                                     type={showPassword ? 'text' : 'password'}
                                     placeholder="••••••••••••"
-                                    className="w-full pl-12 pr-12 py-4 bg-white/70 border border-slate-200 focus:border-primary-500 rounded-2xl text-[13px] font-bold text-slate-900 placeholder-slate-400 outline-none transition-all duration-300 shadow-sm"
+                                    className="w-full pl-12 pr-12 py-4 bg-white/70 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 focus:border-primary-500 dark:focus:border-primary-500 rounded-2xl text-[13px] font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all duration-300 shadow-sm"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 dark:hover:text-white"
                                 >
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -72,16 +72,16 @@ export default function ResetPassword() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Verify Sync</label>
+                            <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] ml-1">Verify Sync</label>
                             <div className="relative group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors">
                                     <Lock size={18} />
                                 </div>
                                 <input
                                     {...register('confirmPassword')}
                                     type="password"
                                     placeholder="••••••••••••"
-                                    className="w-full pl-12 pr-4 py-4 bg-white/70 border border-slate-200 focus:border-primary-500 rounded-2xl text-[13px] font-bold text-slate-900 placeholder-slate-400 outline-none transition-all duration-300 shadow-sm"
+                                    className="w-full pl-12 pr-4 py-4 bg-white/70 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 focus:border-primary-500 dark:focus:border-primary-500 rounded-2xl text-[13px] font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all duration-300 shadow-sm"
                                 />
                             </div>
                             {errors.confirmPassword && <p className="ml-1 text-[10px] font-bold text-red-500 uppercase">{errors.confirmPassword.message}</p>}
@@ -97,12 +97,12 @@ export default function ResetPassword() {
                     </form>
                 ) : (
                     <div className="text-center space-y-8 animate-in fade-in zoom-in duration-500">
-                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto border-4 border-white shadow-xl">
+                        <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto border-4 border-white dark:border-slate-800 shadow-xl">
                             <CheckCircle2 size={32} />
                         </div>
                         <div className="space-y-2">
-                            <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter">Key Established</h4>
-                            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
+                            <h4 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter">Key Established</h4>
+                            <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
                                 Redirecting to terminal lobby...
                             </p>
                         </div>
