@@ -2,8 +2,9 @@ import { NavLink } from 'react-router-dom';
 import {
     LayoutDashboard, Users, Megaphone, Inbox,
     Settings, LayoutGrid, BarChart3, History,
-    MessageSquare, Globe, X
+    MessageSquare, Globe, X, Shield
 } from 'lucide-react';
+import Can from './auth/Can';
 
 export default function Sidebar({ isOpen, closeSidebar, isCollapsed }) {
     const links = [
@@ -14,7 +15,7 @@ export default function Sidebar({ isOpen, closeSidebar, isCollapsed }) {
         { to: '/whatsapp-templates', icon: MessageSquare, label: 'WhatsApp Templates' },
         { to: '/history', icon: History, label: 'Campaign History' },
         { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-        { to: '/settings', icon: Settings, label: 'Settings' },
+        { to: '/settings', icon: Settings, label: 'Settings', permission: 'settings:view' },
     ];
 
     return (
@@ -47,7 +48,7 @@ export default function Sidebar({ isOpen, closeSidebar, isCollapsed }) {
             <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-4 lg:px-6'} space-y-2 mt-8 overflow-y-auto custom-scrollbar`}>
                 {links.map((link) => {
                     const Icon = link.icon;
-                    return (
+                    const navLink = (
                         <NavLink
                             key={link.to}
                             to={link.to}
@@ -74,6 +75,16 @@ export default function Sidebar({ isOpen, closeSidebar, isCollapsed }) {
                             )}
                         </NavLink>
                     );
+
+                    if (link.permission) {
+                        return (
+                            <Can key={link.to} perform={link.permission}>
+                                {navLink}
+                            </Can>
+                        );
+                    }
+
+                    return navLink;
                 })}
             </nav>
 

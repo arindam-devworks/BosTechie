@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     History, Search, Filter, Mail, MessageSquare,
     ChevronLeft, ChevronRight, Eye, RefreshCw,
-    CheckCircle2, Clock, AlertCircle, BarChart2
+    CheckCircle2, Clock, AlertCircle, BarChart2,
+    Info
 } from 'lucide-react';
+import Button from '../components/ui/Button';
+import TableSkeleton from '../components/ui/TableSkeleton';
 
 const MOCK_HISTORY = [
     {
@@ -44,6 +47,7 @@ const MOCK_HISTORY = [
         name: 'Retention Pulse',
         channel: 'email',
         status: 'failed',
+        failureReason: 'SMTP Auth rejection: Protocol breach detected in sector 7.',
         recipients: 150,
         delivered: 10,
         opened: 5,
@@ -53,8 +57,18 @@ const MOCK_HISTORY = [
 ];
 
 export default function CampaignHistory() {
-    const [history] = useState(MOCK_HISTORY);
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        // Simulate data loading
+        const timer = setTimeout(() => {
+            setHistory(MOCK_HISTORY);
+            setLoading(false);
+        }, 1200);
+        return () => clearTimeout(timer);
+    }, []);
 
     const filteredHistory = history.filter(h =>
         h.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -94,14 +108,20 @@ export default function CampaignHistory() {
                 </div>
 
                 <div className="flex items-center gap-3 w-full lg:w-auto">
-                    <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[11px] font-black text-slate-600 uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
-                        <RefreshCw size={14} />
+                    <Button
+                        variant="secondary"
+                        icon={RefreshCw}
+                        onClick={() => {}}
+                    >
                         Sync Logs
-                    </button>
-                    <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-orbit text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                        <BarChart2 size={14} />
+                    </Button>
+                    <Button
+                        variant="primary"
+                        icon={BarChart2}
+                        onClick={() => {}}
+                    >
                         Global Ops View
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -129,78 +149,92 @@ export default function CampaignHistory() {
             </div>
 
             {/* Content Area */}
-            <div className="glass-card rounded-[32px] overflow-hidden border border-white/40">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50/50 border-b border-slate-100">
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Sequence Identity</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol Type</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Sync Status</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Telemetry Metrics</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Timestamp</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Ops</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {filteredHistory.map((campaign) => (
-                                <tr key={campaign.id} className="group hover:bg-slate-50/30 transition-colors">
-                                    <td className="px-8 py-5">
-                                        <div>
-                                            <p className="text-[13px] font-black text-slate-900 uppercase tracking-tighter">{campaign.name}</p>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {campaign.id}</p>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-2 px-3 py-1 bg-white border border-slate-100 rounded-full w-fit">
-                                            {campaign.channel === 'email' ? (
-                                                <Mail size={12} className="text-primary-500" />
-                                            ) : (
-                                                <MessageSquare size={12} className="text-emerald-500" />
-                                            )}
-                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{campaign.channel}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-5">
-                                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusStyle(campaign.status)}`}>
-                                            {getStatusIcon(campaign.status)}
-                                            {campaign.status}
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-6">
-                                            <div className="text-center">
-                                                <p className="text-[12px] font-black text-slate-900">{campaign.delivered}</p>
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Delivered</p>
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-[12px] font-black text-slate-900">{campaign.opened}</p>
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Opened</p>
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-[12px] font-black text-slate-900">{campaign.clicked}</p>
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Clicked</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-5">
-                                        <p className="text-[11px] font-bold text-slate-600 uppercase tracking-widest">{campaign.date}</p>
-                                    </td>
-                                    <td className="px-8 py-5 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-                                                <Eye size={16} />
-                                            </button>
-                                            <button className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-                                                <BarChart2 size={16} />
-                                            </button>
-                                        </div>
-                                    </td>
+            <div className="glass-card rounded-[32px] overflow-hidden border border-white/40 min-h-[400px]">
+                {loading ? (
+                    <TableSkeleton columns={6} rows={6} />
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50/50 border-b border-slate-100">
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Sequence Identity</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol Type</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Sync Status</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Telemetry Metrics</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Timestamp</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Ops</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {filteredHistory.map((campaign) => (
+                                    <tr key={campaign.id} className="group hover:bg-slate-50/30 transition-colors">
+                                        <td className="px-8 py-5">
+                                            <div>
+                                                <p className="text-[13px] font-black text-slate-900 uppercase tracking-tighter">{campaign.name}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {campaign.id}</p>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-2 px-3 py-1 bg-white border border-slate-100 rounded-full w-fit">
+                                                {campaign.channel === 'email' ? (
+                                                    <Mail size={12} className="text-primary-500" />
+                                                ) : (
+                                                    <MessageSquare size={12} className="text-emerald-500" />
+                                                )}
+                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{campaign.channel}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-5">
+                                            <div className="space-y-2">
+                                                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusStyle(campaign.status)}`}>
+                                                    {getStatusIcon(campaign.status)}
+                                                    {campaign.status}
+                                                </div>
+                                                {campaign.status === 'failed' && campaign.failureReason && (
+                                                    <div className="flex items-start gap-2 max-w-[200px] animate-in slide-in-from-top-1 duration-300">
+                                                        <Info size={10} className="text-red-400 shrink-0 mt-0.5" />
+                                                        <p className="text-[9px] font-bold text-red-500 uppercase leading-tight tracking-wider">
+                                                            {campaign.failureReason}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-6">
+                                                <div className="text-center">
+                                                    <p className="text-[12px] font-black text-slate-900">{campaign.delivered}</p>
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Delivered</p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-[12px] font-black text-slate-900">{campaign.opened}</p>
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Opened</p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-[12px] font-black text-slate-900">{campaign.clicked}</p>
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Clicked</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-5">
+                                            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-widest">{campaign.date}</p>
+                                        </td>
+                                        <td className="px-8 py-5 text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
+                                                    <Eye size={16} />
+                                                </button>
+                                                <button className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
+                                                    <BarChart2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
             {/* Pagination Controls */}

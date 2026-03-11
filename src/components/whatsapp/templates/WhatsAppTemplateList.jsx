@@ -12,6 +12,8 @@ export default function WhatsAppTemplateList({
     isLoading,
     error,
     selectedTemplate,
+    selectedIds = [],
+    onToggleSelection,
     onSelect,
     onEdit,
     onDelete,
@@ -40,6 +42,8 @@ export default function WhatsAppTemplateList({
                     key={template.id}
                     template={template}
                     isSelected={selectedTemplate?.id === template.id}
+                    isMultiSelected={selectedIds.includes(template.id)}
+                    onToggleSelection={onToggleSelection}
                     onSelect={onSelect}
                     onEdit={onEdit}
                     onDelete={onDelete}

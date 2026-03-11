@@ -1,34 +1,41 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Plus } from 'lucide-react';
+import Button from '../../ui/Button';
 
 export default function WhatsAppTemplatesEmptyState({ isSearchEmpty, clearSearch }) {
+    const navigate = useNavigate();
+    
     return (
-        <div className="w-full py-16 px-6 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50 flex flex-col items-center justify-center animate-in fade-in">
-            <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 text-slate-300">
-                <FileText size={32} />
+        <div className="w-full py-16 px-6 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[40px] bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-500">
+            <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/20 dark:shadow-none border border-slate-100 dark:border-slate-700/50 flex items-center justify-center mb-6 text-primary-500">
+                <FileText size={40} className="animate-pulse" />
             </div>
 
-            <h3 className="text-[14px] font-black text-slate-700 uppercase tracking-widest mb-2">
-                {isSearchEmpty ? 'No matching templates' : 'No templates found'}
+            <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">
+                {isSearchEmpty ? 'No Protocols Discovered' : 'Blueprint Archive Empty'}
             </h3>
 
-            <p className="text-[12px] text-slate-500 font-medium max-w-[280px] mb-6 leading-relaxed">
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest max-w-[320px] mb-8 leading-relaxed">
                 {isSearchEmpty
-                    ? 'Try adjusting your search criteria or clear active filters to see all results.'
-                    : 'Create your first message template to begin orchestrating WhatsApp campaigns.'}
+                    ? 'Adjust your uplink filters or clear the search criteria to re-establish connection with the blueprints.'
+                    : 'Initialize your first messaging protocol to begin orchestrating orbital WhatsApp campaigns across the sector.'}
             </p>
 
             {isSearchEmpty ? (
-                <button
+                <Button
+                    variant="secondary"
                     onClick={clearSearch}
-                    className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black text-slate-600 uppercase tracking-widest hover:border-slate-300 transition-colors shadow-sm"
                 >
-                    Clear Filters
-                </button>
+                    Clear Search Protocol
+                </Button>
             ) : (
-                <button className="flex items-center gap-2 px-6 py-2.5 bg-orbit text-white rounded-xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                    <Plus size={14} /> New Template
-                </button>
+                <Button 
+                    variant="primary" 
+                    icon={Plus}
+                    onClick={() => navigate('/whatsapp-templates/create')}
+                >
+                    Forge New Blueprint
+                </Button>
             )}
         </div>
     );

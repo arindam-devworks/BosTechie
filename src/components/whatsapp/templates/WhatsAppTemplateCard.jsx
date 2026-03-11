@@ -24,7 +24,9 @@ const STATUS_ICON = {
 export default function WhatsAppTemplateCard({
     template,
     isSelected = false,
+    isMultiSelected = false,
     onSelect,
+    onToggleSelection,
     onEdit,
     onDelete,
 }) {
@@ -64,14 +66,29 @@ export default function WhatsAppTemplateCard({
                 }`}
         >
             {/* Top: icon + status badge */}
-            <div className="flex justify-between items-start mb-5">
-                <div className={`p-2.5 rounded-2xl border transition-colors
-                    ${isSelected
-                        ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-100 dark:border-primary-800/30 text-primary-600 dark:text-primary-400'
-                        : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/30 text-emerald-600 dark:text-emerald-400'
-                    }`}
-                >
-                    <MessageSquare size={18} />
+            <div className="flex justify-between items-start mb-5 relative">
+                <div className="flex items-center gap-3">
+                    <div 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (onToggleSelection) onToggleSelection(template.id);
+                        }}
+                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all cursor-pointer
+                            ${isMultiSelected 
+                                ? 'bg-primary-500 border-primary-500 text-white shadow-lg shadow-primary-500/20' 
+                                : 'bg-white/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-primary-400 group-hover:scale-110'
+                            }`}
+                    >
+                        {isMultiSelected && <div className="w-2.5 h-2.5 bg-white rounded-sm animate-in zoom-in duration-200" />}
+                    </div>
+                    <div className={`p-2.5 rounded-2xl border transition-colors
+                        ${isSelected
+                            ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-100 dark:border-primary-800/30 text-primary-600 dark:text-primary-400'
+                            : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/30 text-emerald-600 dark:text-emerald-400'
+                        }`}
+                    >
+                        <MessageSquare size={18} />
+                    </div>
                 </div>
                 <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 ${STATUS_STYLE[status] || STATUS_STYLE.pending}`}>
                     {STATUS_ICON[status]}

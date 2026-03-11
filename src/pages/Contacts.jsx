@@ -1,16 +1,22 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { contactSchema } from '../validations/contactSchema';
+import { useToast } from '../context/ToastContext';
+import { useModal } from '../context/ModalContext';
+import Button from '../components/ui/Button';
+import Table from '../components/Table';
+import ImportModal from '../components/ui/ImportModal';
 import {
     Plus, Search, Filter, Download,
     Upload, MoreHorizontal, Edit,
     Trash2, UserPlus, Globe, Tag,
     Calendar, Mail, Phone as PhoneIcon,
     ChevronLeft, ChevronRight, X,
-    LayoutGrid, List as ListIcon
+    LayoutGrid, List as ListIcon,
+    UserX, AlertCircle
 } from 'lucide-react';
 
 const MOCK_CONTACTS = [
@@ -28,7 +34,19 @@ export default function Contacts() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingContact, setEditingContact] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [selectedIds, setSelectedIds] = useState([]);
     const itemsPerPage = 10;
+
+    const { success, error } = useToast();
+    const { confirm } = useModal();
+
+    useEffect(() => {
+        // Simulate initial data fetch
+        const timer = setTimeout(() => setIsLoading(false), 800);
+        return () => clearTimeout(timer);
+    }, []);
 
     const { register, handleSubmit, reset, control, formState: { errors, isValid } } = useForm({
         resolver: zodResolver(contactSchema),
@@ -49,16 +67,48 @@ export default function Contacts() {
     const handleSave = (data) => {
         if (editingContact) {
             setContacts(contacts.map(c => c.id === editingContact.id ? { ...c, ...data } : c));
+            success('Entity updated in protocol archive');
         } else {
             setContacts([...contacts, { ...data, id: Date.now(), createdAt: new Date().toISOString().split('T')[0] }]);
+            success('New entity synchronized with Orbit');
         }
         closeModal();
     };
 
-    const handleDelete = (id) => {
-        if (window.confirm('Erase this entity from Orbit?')) {
+    const handleDelete = async (id) => {
+        const confirmed = await confirm({
+            title: 'Erase Entity?',
+            message: 'Are you sure you want to initialize the erasure protocol for this entity? This action is irreversible.',
+            confirmText: 'Erase',
+            cancelText: 'Abort',
+            type: 'danger'
+        });
+
+        if (confirmed) {
             setContacts(contacts.filter(c => c.id !== id));
+            success('Entity erased from orbital records');
         }
+    };
+
+    const handleBulkDelete = async () => {
+        const confirmed = await confirm({
+            title: 'Bulk Erasure?',
+            message: `Are you sure you want to erase ${selectedIds.length} entities from the fleet? This protocol cannot be undone.`,
+            confirmText: 'Execute',
+            cancelText: 'Abort',
+            type: 'danger'
+        });
+
+        if (confirmed) {
+            setContacts(contacts.filter(c => !selectedIds.includes(c.id)));
+            setSelectedIds([]);
+            success(`${selectedIds.length} entities purged from system`);
+        }
+    };
+
+    const handleImport = (results) => {
+        success(`${results.count} entities successfully synchronized with fleet`);
+        setIsImportModalOpen(false);
     };
 
     const openModal = (contact = null) => {
@@ -74,6 +124,76 @@ export default function Contacts() {
         reset();
     };
 
+    const tableColumns = [
+        {
+            header: 'Entity Signature',
+            render: (contact) => (
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-orbit flex items-center justify-center text-white font-black text-sm shadow-md">
+                        {contact.name.charAt(0)}
+                    </div>
+                    <div>
+                        <p className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">{contact.name}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <Calendar size={10} className="text-slate-300 dark:text-slate-600" />
+                            <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Linked: {contact.createdAt}</span>
+                        </div>
+                    </div>
+                </div>
+            )
+        },
+        {
+            header: 'Terminal Comms',
+            render: (contact) => (
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                        <Mail size={12} className="text-primary-400" />
+                        <span className="text-[12px] font-bold">{contact.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-400 dark:text-slate-400">
+                        <PhoneIcon size={12} className="text-slate-300 dark:text-slate-600" />
+                        <span className="text-[11px] font-medium">{contact.phone}</span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            header: 'Global Sector',
+            render: (contact) => (
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-full text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest border border-slate-200/50 dark:border-slate-700/50">
+                    <Globe size={12} className="text-primary-500" />
+                    {contact.country.label || contact.country}
+                </div>
+            )
+        },
+        {
+            header: 'Orbital Clusters',
+            render: (contact) => (
+                <div className="flex flex-wrap gap-1.5">
+                    {(Array.isArray(contact.tags) ? contact.tags : contact.tags.split(',')).map((tag, i) => (
+                        <span key={i} className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-[10px] font-black uppercase tracking-tighter rounded-md border border-primary-100 dark:border-primary-800/30">
+                            #{tag.trim()}
+                        </span>
+                    ))}
+                </div>
+            )
+        },
+        {
+            header: 'Ops',
+            className: 'text-right',
+            render: (contact) => (
+                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => openModal(contact)} className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/40 rounded-lg transition-all">
+                        <Edit size={16} />
+                    </button>
+                    <button onClick={() => handleDelete(contact.id)} className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-lg transition-all">
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            )
+        }
+    ];
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header Section */}
@@ -87,189 +207,138 @@ export default function Contacts() {
                 </div>
 
                 <div className="flex items-center gap-3 w-full lg:w-auto">
-                    <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
-                        <Upload size={14} />
-                        Import CSV
-                    </button>
-                    <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
-                        <Download size={14} />
-                        Export
-                    </button>
-                    <button
-                        onClick={() => openModal()}
-                        className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-orbit text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                        <UserPlus size={14} />
-                        Sync New Entity
-                    </button>
+                    <Button variant="secondary" icon={Upload} onClick={() => setIsImportModalOpen(true)}>Import CSV</Button>
+                    <Button variant="secondary" icon={Download} onClick={() => success('Fleet record exported to terminal')}>Export</Button>
+                    <Button variant="primary" icon={UserPlus} onClick={() => openModal()}>Sync New Entity</Button>
                 </div>
             </div>
 
-            {/* Action Bar */}
-            <div className="glass-card rounded-[32px] p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="relative w-full md:w-96 group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors">
-                        <Search size={18} />
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Search Terminal ID, Entity or Tags..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100/50 dark:border-slate-800/50 rounded-2xl text-[13px] font-bold text-slate-900 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
-                    />
-                </div>
+            <ImportModal 
+                isOpen={isImportModalOpen} 
+                onClose={() => setIsImportModalOpen(false)} 
+                onImport={handleImport}
+            />
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-                    <div className="flex justify-center p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-100/50 dark:border-slate-700/50">
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`flex-1 sm:flex-none flex justify-center p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
-                        >
-                            <ListIcon size={18} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={`flex-1 sm:flex-none flex justify-center p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
-                        >
-                            <LayoutGrid size={18} />
-                        </button>
-                    </div>
-                    <button className="flex justify-center items-center gap-2 px-4 py-3 bg-white dark:bg-slate-900 sm:bg-transparent dark:sm:bg-transparent border border-slate-100 dark:border-slate-800 sm:border-transparent dark:sm:border-transparent rounded-xl text-[11px] font-black text-slate-500 dark:text-slate-400 sm:text-slate-400 uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-colors">
-                        <Filter size={16} />
-                        Advanced Ops
-                    </button>
-                </div>
-            </div>
-
-            {/* Content Area */}
+            {/* Action Bar & Content */}
             {viewMode === 'list' ? (
-                <div className="glass-card rounded-[32px] overflow-hidden border border-white/40 dark:border-slate-800">
-                    <div className="overflow-x-auto border-x-0 border-transparent">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Entity Signature</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Terminal Comms</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Global Sector</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Orbital Clusters</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right">Ops</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                                {paginatedContacts.map((contact) => (
-                                    <tr key={contact.id} className="group hover:bg-slate-50/30 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-orbit flex items-center justify-center text-white font-black text-sm shadow-md">
-                                                    {contact.name.charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <p className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">{contact.name}</p>
-                                                    <div className="flex items-center gap-1.5 mt-0.5">
-                                                        <Calendar size={10} className="text-slate-300 dark:text-slate-600" />
-                                                        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Linked: {contact.createdAt}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                                                    <Mail size={12} className="text-primary-400" />
-                                                    <span className="text-[12px] font-bold">{contact.email}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-slate-400 dark:text-slate-400">
-                                                    <PhoneIcon size={12} className="text-slate-300 dark:text-slate-600" />
-                                                    <span className="text-[11px] font-medium">{contact.phone}</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-full text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest border border-slate-200/50 dark:border-slate-700/50">
-                                                <Globe size={12} className="text-primary-500" />
-                                                {contact.country.label || contact.country}
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {Array.isArray(contact.tags) ? contact.tags.map((tag, i) => (
-                                                    <span key={i} className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-[10px] font-black uppercase tracking-tighter rounded-md border border-primary-100 dark:border-primary-800/30">
-                                                        #{tag.trim()}
-                                                    </span>
-                                                )) : contact.tags.split(',').map((tag, i) => (
-                                                    <span key={i} className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-[10px] font-black uppercase tracking-tighter rounded-md border border-primary-100 dark:border-primary-800/30">
-                                                        #{tag.trim()}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => openModal(contact)} className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/40 rounded-lg transition-all">
-                                                    <Edit size={16} />
-                                                </button>
-                                                <button onClick={() => handleDelete(contact.id)} className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-lg transition-all">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <Table 
+                    columns={tableColumns}
+                    data={paginatedContacts}
+                    isLoading={isLoading}
+                    searchPlaceholder="Search Terminal ID, Entity or Clusters..."
+                    searchValue={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    enableSelection={true}
+                    selectedIds={selectedIds}
+                    onSelectionChange={setSelectedIds}
+                    bulkActions={
+                        <Button 
+                            variant="danger" 
+                            size="sm" 
+                            icon={Trash2} 
+                            onClick={handleBulkDelete}
+                        >
+                            Execute Purge
+                        </Button>
+                    }
+                    emptyStateIcon={<UserX size={48} className="text-slate-300" />}
+                    emptyStateMessage="No entities discovered in this sector"
+                    actions={
+                        <div className="flex items-center gap-2">
+                            <div className="flex p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-100/50 dark:border-slate-700/50">
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm' : 'text-slate-400'}`}
+                                >
+                                    <ListIcon size={18} />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm' : 'text-slate-400'}`}
+                                >
+                                    <LayoutGrid size={18} />
+                                </button>
+                            </div>
+                            <Button variant="ghost" size="sm" icon={Filter}>Advanced Ops</Button>
+                        </div>
+                    }
+                />
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {paginatedContacts.map((contact) => (
-                        <div key={contact.id} className="glass-card rounded-[32px] p-6 group hover:border-primary-200/50 dark:hover:border-primary-500/30 transition-all border border-transparent">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="w-14 h-14 rounded-2xl bg-orbit flex items-center justify-center text-white font-black text-xl shadow-lg shadow-primary-500/10">
-                                    {contact.name.charAt(0)}
-                                </div>
-                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => openModal(contact)} className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 rounded-xl transition-all">
-                                        <Edit size={16} />
-                                    </button>
-                                    <button onClick={() => handleDelete(contact.id)} className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 rounded-xl transition-all">
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1">{contact.name}</h3>
-                                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                    <Globe size={12} className="text-primary-500" />
-                                    {contact.country.label || contact.country}
-                                </div>
-                            </div>
-
-                            <div className="space-y-3 mb-6">
-                                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
-                                    <Mail size={14} className="text-slate-300 dark:text-slate-600 group-hover:text-primary-400 transition-colors" />
-                                    <span className="text-[13px] font-bold truncate">{contact.email}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-slate-400 dark:text-slate-400">
-                                    <PhoneIcon size={14} className="text-slate-300 dark:text-slate-600" />
-                                    <span className="text-[12px] font-medium">{contact.phone}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-1.5">
-                                {Array.isArray(contact.tags) ? contact.tags.map((tag, i) => (
-                                    <span key={i} className="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-tighter rounded-xl group-hover:bg-primary-50 dark:group-hover:bg-primary-900/30 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                                        {tag.trim()}
-                                    </span>
-                                )) : contact.tags.split(',').map((tag, i) => (
-                                    <span key={i} className="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-tighter rounded-xl group-hover:bg-primary-50 dark:group-hover:bg-primary-900/30 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                                        {tag.trim()}
-                                    </span>
-                                ))}
+                <div className="space-y-6">
+                    <div className="glass-card rounded-[32px] p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="relative w-full md:w-96 group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search clusters..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 bg-slate-50/50 dark:bg-slate-900/50 text-[13px] font-bold text-slate-900 dark:text-white border border-transparent dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-primary-500 outline-none transition-all shadow-inner"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <div className="flex p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-100/50 dark:border-slate-700/50">
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm' : 'text-slate-400'}`}
+                                >
+                                    <ListIcon size={18} />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm' : 'text-slate-400'}`}
+                                >
+                                    <LayoutGrid size={18} />
+                                </button>
                             </div>
                         </div>
-                    ))}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {paginatedContacts.map((contact) => (
+                            <div key={contact.id} className="glass-card rounded-[32px] p-6 group hover:border-primary-200/50 dark:hover:border-primary-500/30 transition-all border border-transparent">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="w-14 h-14 rounded-2xl bg-orbit flex items-center justify-center text-white font-black text-xl shadow-lg shadow-primary-500/10">
+                                        {contact.name.charAt(0)}
+                                    </div>
+                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => openModal(contact)} className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 rounded-xl transition-all">
+                                            <Edit size={16} />
+                                        </button>
+                                        <button onClick={() => handleDelete(contact.id)} className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 rounded-xl transition-all">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="mb-6">
+                                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1">{contact.name}</h3>
+                                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                        <Globe size={12} className="text-primary-500" />
+                                        {contact.country.label || contact.country}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+                                        <Mail size={14} className="text-slate-300 dark:text-slate-600 group-hover:text-primary-400 transition-colors" />
+                                        <span className="text-[13px] font-bold truncate">{contact.email}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-slate-400 dark:text-slate-400">
+                                        <PhoneIcon size={14} className="text-slate-300 dark:text-slate-600" />
+                                        <span className="text-[12px] font-medium">{contact.phone}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-1.5">
+                                    {(Array.isArray(contact.tags) ? contact.tags : contact.tags.split(',')).map((tag, i) => (
+                                        <span key={i} className="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-tighter rounded-xl group-hover:bg-primary-50 dark:group-hover:bg-primary-900/30 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                                            {tag.trim()}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
@@ -280,31 +349,31 @@ export default function Contacts() {
                         Sector <span className="text-slate-900 dark:text-white">{(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredContacts.length)}</span> of {filteredContacts.length}
                     </p>
                     <div className="flex items-center gap-2">
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(p => p - 1)}
-                            className="p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-all"
-                        >
-                            <ChevronLeft size={18} />
-                        </button>
+                            icon={ChevronLeft}
+                        />
                         <div className="flex items-center gap-1">
                             {[...Array(totalPages)].map((_, i) => (
                                 <button
                                     key={i}
                                     onClick={() => setCurrentPage(i + 1)}
-                                    className={`w-10 h-10 rounded-2xl text-[11px] font-black transition-all ${currentPage === i + 1 ? 'bg-orbit text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                                    className={`w-10 h-10 rounded-2xl text-[11px] font-black transition-all ${currentPage === i + 1 ? 'bg-orbit text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-100 dark:border-slate-800 hover:bg-slate-50'}`}
                                 >
                                     {i + 1}
                                 </button>
                             ))}
                         </div>
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(p => p + 1)}
-                            className="p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-all"
-                        >
-                            <ChevronRight size={18} />
-                        </button>
+                            icon={ChevronRight}
+                        />
                     </div>
                 </div>
             )}
@@ -395,20 +464,21 @@ export default function Contacts() {
                             </div>
 
                             <div className="pt-6 flex gap-4">
-                                <button
+                                <Button
                                     type="button"
+                                    variant="secondary"
                                     onClick={closeModal}
-                                    className="flex-1 py-4 border border-slate-100 dark:border-slate-800 rounded-2xl text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-900 transition-all font-outfit"
+                                    className="flex-1"
                                 >
                                     Abort
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="submit"
                                     disabled={!isValid}
-                                    className="flex-[2] py-4 bg-orbit text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 active:scale-[0.98] transition-all disabled:opacity-50 font-outfit"
+                                    className="flex-[2]"
                                 >
                                     {editingContact ? 'Commit Changes' : 'Initialize Entity'}
-                                </button>
+                                </Button>
                             </div>
                         </form>
                     </div>

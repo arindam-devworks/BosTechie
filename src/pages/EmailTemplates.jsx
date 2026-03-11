@@ -18,14 +18,28 @@ import {
     Mail, Layout as LayoutIcon, Download, Trash2, Eye
 } from 'lucide-react';
 
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
+import useUnsavedChanges from '../services/useUnsavedChanges';
+import Button from '../components/ui/Button';
 import EmailDesigner from '../components/EmailDesigner';
 import TemplateGallery, { TEMPLATES } from '../components/TemplateGallery';
 
 export default function EmailTemplates() {
+    const { success } = useToast();
     const [templateName, setTemplateName] = useState('New Campaign Template');
     const [blocks, setBlocks] = useState([]);
     const [activeBlockId, setActiveBlockId] = useState(null);
     const [activeTemplateId, setActiveTemplateId] = useState(null);
+    const [isDirty, setIsDirty] = useState(false);
+
+    // Track unsaved changes
+    useUnsavedChanges(isDirty);
+
+    const handleBlocksChange = (newBlocks) => {
+        setBlocks(newBlocks);
+        setIsDirty(true);
+    };
 
     const loadTemplate = (templateId) => {
         setActiveTemplateId(templateId);
@@ -55,6 +69,7 @@ export default function EmailTemplates() {
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
+        success('Protocol exported to terminal buffer');
     };
 
     return (
@@ -76,29 +91,41 @@ export default function EmailTemplates() {
                             />
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Template Management</span>
+                            <div className={`w-1.5 h-1.5 rounded-full ${isDirty ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`}></div>
+                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                                {isDirty ? 'Unsaved Structure' : 'Blueprint Archived'}
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <button
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={Download}
                         onClick={exportAsJson}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-black font-bold text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-gray-900/10"
                     >
-                        <Download size={14} /> Export JSON
-                    </button>
-                    <button className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-bold text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-primary-600/20 active:scale-95">
-                        <Play size={14} /> Save Template
-                    </button>
+                        Export JSON
+                    </Button>
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        icon={Play}
+                        onClick={() => {
+                            success('Template architecture synchronized with Orbit');
+                            setIsDirty(false);
+                        }}
+                    >
+                        Save Template
+                    </Button>
                 </div>
             </div>
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 <EmailDesigner
                     blocks={blocks}
-                    setBlocks={setBlocks}
+                    setBlocks={handleBlocksChange}
                     activeBlockId={activeBlockId}
                     setActiveBlockId={setActiveBlockId}
                 />

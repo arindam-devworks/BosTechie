@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Users, Send, MessageSquareText, ThumbsUp, Activity } from 'lucide-react';
+import { Users, Send, MessageSquareText, ThumbsUp, Activity, BarChart3 } from 'lucide-react';
+import Button from '../components/ui/Button';
 
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
@@ -39,11 +40,13 @@ export default function Dashboard() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard Overview</h1>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
-                    <Activity size={16} />
-                    View Reports
-                </button>
+                <div>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Terminal Dashboard</h1>
+                    <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mt-1">Satellite System Analysis</p>
+                </div>
+                <Button variant="secondary" icon={Activity}>
+                    View Analytics Report
+                </Button>
             </div>
 
             {error && (

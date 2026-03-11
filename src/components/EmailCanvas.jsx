@@ -43,19 +43,49 @@ export function SortableBlock({ id, block, isActive, onClick, onRemove, onDuplic
 
         switch (type) {
             case 'navbar':
+                const logoAlignment = content.logoAlignment || 'left';
+                
+                const logoElement = content.logoImage ? (
+                    <img
+                        src={content.logoImage}
+                        alt={content.logoAlt || 'Logo'}
+                        style={{ width: `${content.logoWidth || 40}px`, height: 'auto', objectFit: 'contain' }}
+                        className="block"
+                    />
+                ) : (
+                    <div className="w-10 h-10 bg-orbit rounded-xl flex items-center justify-center text-white font-black italic shadow-lg shadow-primary-500/20 shrink-0">
+                        {content.logoText || 'BO'}
+                    </div>
+                );
+
+                const logoWrapper = content.logoUrl ? (
+                    <a href={content.logoUrl} target="_blank" rel="noopener noreferrer" className="block cursor-pointer hover:opacity-90 transition-opacity">
+                        {logoElement}
+                    </a>
+                ) : (
+                    <div>{logoElement}</div>
+                );
+
+                let navLayoutClass = "flex items-center justify-between px-12";
+                if (logoAlignment === 'center') {
+                    navLayoutClass = "flex flex-col items-center justify-center px-12 gap-6";
+                } else if (logoAlignment === 'right') {
+                    navLayoutClass = "flex flex-row-reverse items-center justify-between px-12";
+                }
+
                 return (
-                    <div className="flex items-center justify-between px-12" style={containerStyle}>
+                    <div className={navLayoutClass} style={containerStyle}>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-orbit rounded-xl flex items-center justify-center text-white font-black italic shadow-lg shadow-primary-500/20">
-                                {content.logoText || 'BO'}
-                            </div>
-                            <span className="font-black tracking-tighter text-sm uppercase">
-                                {content.companyName || 'BOSTECHIE ORBIT'}
-                            </span>
+                            {logoWrapper}
+                            {(!content.logoImage || content.companyName) && (
+                                <span className="font-black tracking-tighter text-sm uppercase text-slate-900 dark:text-white">
+                                    {content.companyName || (!content.logoImage ? 'BOSTECHIE ORBIT' : '')}
+                                </span>
+                            )}
                         </div>
                         <div className="flex gap-6 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">
                             {(content.links || []).map((link, idx) => (
-                                <a key={idx} href={link.url} className="hover:text-primary-600 cursor-pointer transition-colors block">
+                                <a key={idx} href={link.url} className="hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer transition-colors block text-slate-900 dark:text-white">
                                     {link.label}
                                 </a>
                             ))}

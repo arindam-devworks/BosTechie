@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Table from '../components/Table';
-import { Mail, Smartphone, RefreshCw, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Mail, Smartphone, RefreshCw, CheckCircle2, Clock, XCircle, Inbox as InboxIcon } from 'lucide-react';
+import Button from '../components/ui/Button';
 
 export default function Inbox() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -67,7 +68,10 @@ export default function Inbox() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Unified Inbox</h1>
+                <div>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Unified Terminal</h1>
+                    <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mt-1">Cross-Platform Response Stream</p>
+                </div>
             </div>
 
             <Table
@@ -75,17 +79,18 @@ export default function Inbox() {
                 data={messages}
                 searchValue={searchTerm}
                 onSearchChange={setSearchTerm}
-                searchPlaceholder="Search messages..."
-                emptyStateMessage="Your inbox is empty. No replies available yet."
+                searchPlaceholder="Search orbital messages..."
+                emptyStateIcon={InboxIcon}
+                emptyStateMessage="Your communications buffer is currently empty. No incoming packets detected."
                 actions={
-                    <button
+                    <Button
+                        variant="secondary"
                         onClick={handleRefresh}
-                        disabled={loading}
-                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium shadow-sm disabled:opacity-50"
+                        isLoading={loading}
+                        icon={RefreshCw}
                     >
-                        <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                        <span className="hidden sm:inline">Refresh</span>
-                    </button>
+                        Synchronize
+                    </Button>
                 }
             />
         </div>

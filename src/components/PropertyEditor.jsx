@@ -172,7 +172,125 @@ export default function PropertyEditor({ activeBlock, updateBlock, removeBlock, 
                         </div>
                         <div className="space-y-5">
                             <div className="space-y-3">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Logo Text</span>
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Logo Media</span>
+                                {content.logoImage ? (
+                                    <div className="space-y-4">
+                                        <div className="relative group rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                                            <div className="aspect-video w-full flex items-center justify-center p-4 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwLjEiLz48L3N2Zz4=')]">
+                                                <img src={content.logoImage} alt="Logo preview" className="max-h-full max-w-full object-contain" />
+                                            </div>
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                                                <label className="p-2 cursor-pointer bg-white/20 hover:bg-white/30 rounded-lg text-white transition-colors">
+                                                    <Upload size={14} />
+                                                    <input
+                                                        type="file"
+                                                        accept="image/png, image/jpeg, image/jpg, image/svg+xml"
+                                                        className="hidden"
+                                                        onChange={(e) => {
+                                                            const file = e.target.files[0];
+                                                            if (file) {
+                                                                const reader = new FileReader();
+                                                                reader.onloadend = () => {
+                                                                    handleContentChange({ logoImage: reader.result });
+                                                                };
+                                                                reader.readAsDataURL(file);
+                                                            }
+                                                        }}
+                                                    />
+                                                </label>
+                                                <button
+                                                    onClick={() => handleContentChange({ logoImage: '' })}
+                                                    className="p-2 cursor-pointer bg-red-500/80 hover:bg-red-500 rounded-lg text-white transition-colors"
+                                                    title="Remove Logo"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between px-1">
+                                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Logo Size</span>
+                                                <span className="text-[10px] font-black text-primary-600 dark:text-primary-400">{content.logoWidth || 40}PX</span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="20"
+                                                max="300"
+                                                value={content.logoWidth || 40}
+                                                onChange={(e) => handleContentChange({ logoWidth: parseInt(e.target.value) })}
+                                                className="w-full accent-primary-600 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full appearance-none cursor-pointer"
+                                            />
+                                        </div>
+                                        
+                                        <div className="space-y-3">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Alignment</span>
+                                            <div className="flex gap-1.5 p-1.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-inner">
+                                                {['left', 'center', 'right'].map((align) => (
+                                                    <button
+                                                        key={align}
+                                                        onClick={() => handleContentChange({ logoAlignment: align })}
+                                                        className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${
+                                                            (content.logoAlignment || 'left') === align 
+                                                                ? 'bg-white dark:bg-slate-700 shadow-sm text-primary-600 dark:text-primary-400' 
+                                                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                                        }`}
+                                                    >
+                                                        {align === 'left' && <AlignLeft size={14} />}
+                                                        {align === 'center' && <AlignCenter size={14} />}
+                                                        {align === 'right' && <AlignRight size={14} />}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Alt Text (Optional)</span>
+                                            <input
+                                                className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg text-[10px] font-bold text-slate-700 dark:text-slate-300 shadow-inner"
+                                                value={content.logoAlt || ''}
+                                                onChange={(e) => handleContentChange({ logoAlt: e.target.value })}
+                                                placeholder="Logo alt text"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Link URL (Optional)</span>
+                                            <input
+                                                className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg text-[10px] font-bold text-slate-700 dark:text-slate-300 shadow-inner"
+                                                value={content.logoUrl || ''}
+                                                onChange={(e) => handleContentChange({ logoUrl: e.target.value })}
+                                                placeholder="https://..."
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <label className="flex flex-col items-center justify-center p-6 bg-slate-50/50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-primary-300 dark:hover:border-primary-700 transition-all">
+                                        <div className="w-10 h-10 bg-white dark:bg-slate-700 shadow-sm rounded-full flex items-center justify-center text-primary-500 mb-3">
+                                            <Upload size={16} />
+                                        </div>
+                                        <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Upload Logo</span>
+                                        <span className="text-[9px] text-slate-400 mt-1 uppercase tracking-widest text-center">PNG, JPG, SVG</span>
+                                        <input
+                                            type="file"
+                                            accept="image/png, image/jpeg, image/jpg, image/svg+xml"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    const reader = new FileReader();
+                                                    reader.onloadend = () => {
+                                                        handleContentChange({ logoImage: reader.result });
+                                                    };
+                                                    reader.readAsDataURL(file);
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                )}
+                            </div>
+                            <div className="space-y-3">
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Logo Text (Fallback)</span>
                                 <input
                                     className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-[11px] font-black text-slate-900 dark:text-white shadow-inner"
                                     value={content.logoText || ''}

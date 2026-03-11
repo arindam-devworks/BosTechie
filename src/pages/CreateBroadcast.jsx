@@ -1,15 +1,18 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { broadcastSchema } from '../validations/broadcastSchema';
-import { Send, Smartphone, Mail, Users, Paperclip, Image as ImageIcon, X, FileText } from 'lucide-react';
+import { Send, Smartphone, Mail, Users, Paperclip, Image as ImageIcon, X, FileText, CheckCircle2 } from 'lucide-react';
+import useUnsavedChanges from '../services/useUnsavedChanges';
+import { useToast } from '../context/ToastContext';
+import Button from '../components/ui/Button';
 
 export default function CreateBroadcast() {
-    const [successMessage, setSuccessMessage] = useState('');
+    const { success } = useToast();
     const logoInputRef = useRef(null);
     const attachmentInputRef = useRef(null);
 
-    const { register, handleSubmit, watch, formState: { errors, isSubmitting }, reset, setValue } = useForm({
+    const { register, handleSubmit, watch, formState: { errors, isSubmitting, isDirty }, reset, setValue } = useForm({
         resolver: zodResolver(broadcastSchema),
         defaultValues: {
             channel: 'whatsapp',
@@ -17,6 +20,9 @@ export default function CreateBroadcast() {
             attachments: []
         }
     });
+
+    // Integrated Unsaved Changes Guard
+    useUnsavedChanges(isDirty);
 
     const previewTitle = watch('title');
     const previewSalutation = watch('salutation');
@@ -61,9 +67,8 @@ export default function CreateBroadcast() {
 
     const onSubmit = async (data) => {
         try {
-            setSuccessMessage('');
             await new Promise(resolve => setTimeout(resolve, 1000));
-            setSuccessMessage('Broadcast queued successfully!');
+            success('Broadcast transmission queued in orbital buffer');
             reset({
                 channel: data.channel,
                 audience: '',
@@ -75,29 +80,39 @@ export default function CreateBroadcast() {
                 signatureLogo: data.signatureLogo,
                 attachments: []
             });
-            setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
             console.error(err);
         }
     };
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create Broadcast</h1>
+        <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Broadcast Forge</h1>
+                    <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mt-1">Multi-Channel Transmission Hub</p>
+                </div>
+                
+                {/* Sticky Status Indicator */}
+                <div className="flex items-center gap-3 px-4 py-2 bg-slate-900/5 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-white/5 transition-all">
+                    {isDirty ? (
+                        <>
+                            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                            <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Unsaved Blueprint</span>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                            <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Protocol Stored</span>
+                        </>
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Form Section */}
-                <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6 transition-colors duration-200">
+                <div className="lg:col-span-2 glass-card rounded-[40px] p-6 lg:p-8 border border-slate-100 dark:border-slate-800 transition-all">
                     <form id="broadcast-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
-                        {successMessage && (
-                            <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-medium flex items-center gap-2 border border-green-100 dark:border-green-900/30">
-                                <Send size={18} />
-                                {successMessage}
-                            </div>
-                        )}
 
                         <div className="space-y-6">
                             <div>
@@ -319,14 +334,14 @@ export default function CreateBroadcast() {
                         </div>
 
                         <div className="flex justify-end pt-4">
-                            <button
+                            <Button
                                 type="submit"
-                                disabled={isSubmitting}
-                                className="flex items-center gap-2 px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all font-semibold shadow-lg shadow-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0"
+                                isLoading={isSubmitting}
+                                icon={Send}
+                                className="px-10"
                             >
-                                <Send size={18} />
-                                {isSubmitting ? 'Sending...' : (selectedChannel === 'email' ? 'Send Campaign' : 'Send Broadcast')}
-                            </button>
+                                {selectedChannel === 'email' ? 'Ignite Email Flux' : 'Transmit Broadcast'}
+                            </Button>
                         </div>
                     </form>
                 </div>

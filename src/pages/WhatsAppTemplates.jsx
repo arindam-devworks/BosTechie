@@ -1,9 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     Search, Filter, Plus, Globe, MessageSquare, Smartphone,
-    CheckCircle2, Clock, XCircle, X
+    CheckCircle2, Clock, XCircle, X, Trash2
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Button from '../components/ui/Button';
+import { useToast } from '../context/ToastContext';
+import { useModal } from '../context/ModalContext';
 
 // Page-scoped data & components  (no impact on other pages)
 import { WHATSAPP_TEMPLATE_MOCK, countByStatus } from '../data/whatsappTemplateMockData';
@@ -36,8 +39,12 @@ export default function WhatsAppTemplates() {
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [showPreviewDrawer, setShowPreviewDrawer] = useState(false);
 
-    // Delete modal state
-    const [pendingDelete, setPendingDelete] = useState(null); // template to delete
+    // Bulk selection state
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [pendingDelete, setPendingDelete] = useState(null);
+
+    const { confirm } = useModal();
+    const { success } = useToast();
 
     // ── Simulate loading ──────────────────────────────────────────────────────
     useEffect(() => {
@@ -75,7 +82,29 @@ export default function WhatsAppTemplates() {
 
     const isSearchOrFilterActive = searchTerm.length > 0 || activeTab !== ALL_TAB;
 
-    // ── Card handlers ─────────────────────────────────────────────────────────
+    // ── Handlers ─────────────────────────────────────────────────────────
+    const handleToggleSelection = useCallback((id) => {
+        setSelectedIds(prev => 
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    }, []);
+
+    const handleBulkDelete = useCallback(async () => {
+        const confirmed = await confirm({
+            title: 'Bulk Destruction?',
+            message: `Initialize terminal erasure for ${selectedIds.length} blueprints? This protocol is irreversible.`,
+            confirmText: 'Execute',
+            cancelText: 'Abort',
+            type: 'danger'
+        });
+
+        if (confirmed) {
+            setTemplates(prev => prev.filter(t => !selectedIds.includes(t.id)));
+            setSelectedIds([]);
+            success(`${selectedIds.length} blueprints purged from archive`);
+        }
+    }, [selectedIds, confirm, success]);
+
     const handleSelect = useCallback((template) => {
         setSelectedTemplate(template);
         // On small screens, open the preview drawer
@@ -102,7 +131,8 @@ export default function WhatsAppTemplates() {
             return next;
         });
         setPendingDelete(null);
-    }, [selectedTemplate]);
+        success('Protocol archived successfully');
+    }, [selectedTemplate, success]);
 
     const clearFilters = useCallback(() => {
         setSearchTerm('');
@@ -129,17 +159,40 @@ export default function WhatsAppTemplates() {
 
                 {/* Header action buttons */}
                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
-                        <Globe size={13} /> Language Packs
-                    </button>
-                    <Link
-                        to="/whatsapp-templates/create"
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-orbit text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                        <Plus size={13} /> Forge New
-                    </Link>
+                    <Button variant="secondary" icon={Globe}>Language Packs</Button>
+                    <Button variant="primary" icon={Plus} onClick={() => navigate('/whatsapp-templates/create')}>Forge New</Button>
                 </div>
             </div>
+
+            {/* ── Bulk Action Bar ────────────────────────────────────────── */}
+            {selectedIds.length > 0 && (
+                <div className="sticky top-4 z-[40] w-full bg-slate-900 dark:bg-slate-800 text-white p-4 rounded-[28px] shadow-2xl shadow-primary-500/20 border border-slate-800 flex items-center justify-between animate-in slide-in-from-top-4 duration-300">
+                    <div className="flex items-center gap-4 ml-2">
+                        <div className="w-8 h-8 rounded-xl bg-primary-500 flex items-center justify-center font-black text-xs">
+                            {selectedIds.length}
+                        </div>
+                        <p className="text-[11px] font-black uppercase tracking-widest">Targets Selected for Protocol</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="bg-white/10 border-white/10 text-white hover:bg-white/20"
+                            onClick={() => setSelectedIds([])}
+                        >
+                            Deselect All
+                        </Button>
+                        <Button 
+                            variant="danger" 
+                            size="sm" 
+                            icon={Trash2}
+                            onClick={handleBulkDelete}
+                        >
+                            Purge Archives
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* ── Content area ─────────────────────────────────────────────── */}
             {/* xl: side-by-side | below xl: single column */}
@@ -236,6 +289,8 @@ export default function WhatsAppTemplates() {
                         isLoading={isLoading}
                         error={null}
                         selectedTemplate={selectedTemplate}
+                        selectedIds={selectedIds}
+                        onToggleSelection={handleToggleSelection}
                         onSelect={handleSelect}
                         onEdit={handleEdit}
                         onDelete={handleDeleteRequest}

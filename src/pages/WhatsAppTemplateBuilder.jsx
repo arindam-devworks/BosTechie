@@ -1,32 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Save, Eye, Image as ImageIcon, Video, FileText,
     Type, Smartphone, ChevronRight, MessageSquare, Plus, CheckCircle2,
     ArrowLeft, X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
+import Button from '../components/ui/Button';
+import useUnsavedChanges from '../services/useUnsavedChanges';
+
+const INITIAL_TEMPLATE_DATA = {
+    name: '',
+    category: 'Marketing',
+    language: 'English (US)',
+    headerType: 'None', // None, Text, Image, Video, Document
+    headerMediaUrl: null,
+    bodyText: '',
+    footerText: '',
+    buttons: [] // { type: 'Quick Reply'|'Visit Website'|'Call Phone Number', text: '', value: '' }
+};
 
 export default function WhatsAppTemplateBuilder() {
-    const [templateData, setTemplateData] = useState({
-        name: '',
-        category: 'Marketing',
-        language: 'English (US)',
-        headerType: 'None', // None, Text, Image, Video, Document
-        headerMediaUrl: null,
-        bodyText: '',
-        footerText: '',
-        buttons: [] // { type: 'Quick Reply'|'Visit Website'|'Call Phone Number', text: '', value: '' }
-    });
-
+    const [templateData, setTemplateData] = useState(INITIAL_TEMPLATE_DATA);
     const [isSaving, setIsSaving] = useState(false);
     const [activeView, setActiveView] = useState('edit'); // 'edit', 'preview'
+    const [lastSaved, setLastSaved] = useState(null);
+
+    const { success } = useToast();
+
+    const isDirty = useMemo(() => {
+        return JSON.stringify(templateData) !== JSON.stringify(INITIAL_TEMPLATE_DATA);
+    }, [templateData]);
+
+    useUnsavedChanges(isDirty);
 
     const handleSave = async () => {
         setIsSaving(true);
         // Simulate API call
         await new Promise(r => setTimeout(r, 1500));
         setIsSaving(false);
-        // show success logic (could add toast later)
+        setLastSaved(new Date());
+        success('Template configuration synchronized');
     };
 
     const addVariable = () => {
@@ -65,7 +79,15 @@ export default function WhatsAppTemplateBuilder() {
                         <ArrowLeft size={18} />
                     </Link>
                     <div>
-                        <h1 className="text-xl lg:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Template Forge</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-xl lg:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Template Forge</h1>
+                            {lastSaved && (
+                                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-full animate-in fade-in slide-in-from-left duration-500">
+                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+                                    <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Saved • {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                            )}
+                        </div>
                         <p className="text-[10px] font-black text-slate-500 mt-1 uppercase tracking-widest">WhatsApp Business Protocol</p>
                     </div>
                 </div>
@@ -87,13 +109,15 @@ export default function WhatsAppTemplateBuilder() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <button
+                    <Button
+                        variant="primary"
+                        icon={Save}
                         onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex items-center gap-3 px-6 lg:px-8 py-3 bg-orbit text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-primary-500/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                        isLoading={isSaving}
+                        disabled={!isDirty}
                     >
-                        {isSaving ? 'Saving...' : <><Save size={14} /> Save Template</>}
-                    </button>
+                        Save Template
+                    </Button>
                 </div>
             </div>
 

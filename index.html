@@ -8,6 +8,26 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.addEventListener('error', (event) => {
+        document.body.innerHTML = `
+          <div style="padding: 2rem; background: #fee2e2; color: #991b1b; font-family: monospace; min-height: 100vh;">
+            <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 1rem;">Crash Detected</h1>
+            <p style="font-size: 16px; margin-bottom: 0.5rem;"><strong>Message:</strong> ${event.message}</p>
+            <pre style="white-space: pre-wrap; font-size: 12px; background: white; padding: 1rem; border: 1px solid #fca5a5; overflow: auto;">${event.error?.stack || 'No stack trace available'}</pre>
+          </div>
+        `;
+      });
+      window.addEventListener('unhandledrejection', (event) => {
+        document.body.innerHTML = `
+          <div style="padding: 2rem; background: #fee2e2; color: #991b1b; font-family: monospace; min-height: 100vh;">
+            <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 1rem;">Unhandled Promise Rejection Detected</h1>
+            <p style="font-size: 16px; margin-bottom: 0.5rem;"><strong>Reason:</strong> ${event.reason?.message || event.reason}</p>
+            <pre style="white-space: pre-wrap; font-size: 12px; background: white; padding: 1rem; border: 1px solid #fca5a5; overflow: auto;">${event.reason?.stack || 'No stack trace available'}</pre>
+          </div>
+        `;
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

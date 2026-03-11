@@ -1,54 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Mail, Smartphone, Send, Save, Eye, Users,
     Paperclip, X, FileText, CheckCircle2, ChevronRight,
     MessageSquare, AlertCircle, Info, Sparkles, ShieldCheck,
-    Globe, Phone as PhoneIcon, User, Layers, MoreHorizontal, Plus
+    Globe, Phone as PhoneIcon, User, Layers, MoreHorizontal, Plus, Loader2
 } from 'lucide-react';
 import EmailDesigner from '../components/EmailDesigner';
 import WhatsAppCampaignWizard from '../components/whatsapp/wizard/WhatsAppCampaignWizard';
+import { useToast } from '../context/ToastContext';
+import Button from '../components/ui/Button';
+import useUnsavedChanges from '../services/useUnsavedChanges';
 
-const WHATSAPP_TEMPLATES = [
-    { id: 'welcome', name: 'Welcome Message', body: 'Hello {{1}}, welcome to BosTechie! We are excited to have you on board.' },
-    { id: 'promo', name: 'Seasonal Promo', body: 'Hey {{1}}, don\'t miss out on our special 50% discount this weekend! Use code: {{2}}' },
-    { id: 'update', name: 'Service Update', body: 'Important update for {{1}}: Our systems will be undergoing maintenance on {{2}}.' }
-];
+const INITIAL_EMAIL_DATA = {
+    senderName: 'BosTechie Orbit Ops',
+    from: 'ops@orbit.bostechie.io',
+    replyTo: 'support@orbit.bostechie.io',
+    subject: '',
+    previewText: 'Incoming Transmission from Sector 7G',
+    contacts: [],
+    attachments: [],
+    blocks: []
+};
+
+const INITIAL_WHATSAPP_DATA = {
+    templateId: '',
+    contacts: [],
+    variables: { '1': '', '2': '' }
+};
 
 export default function CampaignBuilder() {
     const [activeTab, setActiveTab] = useState('email'); // 'email', 'whatsapp'
-    const [successMessage, setSuccessMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
+    const [lastSaved, setLastSaved] = useState(null);
+
+    const { success } = useToast();
 
     // Email Campaign State
-    const [emailData, setEmailData] = useState({
-        senderName: 'BosTechie Orbit Ops',
-        from: 'ops@orbit.bostechie.io',
-        replyTo: 'support@orbit.bostechie.io',
-        subject: '',
-        previewText: 'Incoming Transmission from Sector 7G',
-        contacts: [],
-        attachments: [],
-        blocks: []
-    });
+    const [emailData, setEmailData] = useState(INITIAL_EMAIL_DATA);
     const [activeBlockId, setActiveBlockId] = useState(null);
 
     // WhatsApp Campaign State
-    const [whatsAppData, setWhatsAppData] = useState({
-        templateId: '',
-        contacts: [],
-        variables: {
-            '1': '', // Customer Name
-            '2': '', // Extra Variable
+    const [whatsAppData, setWhatsAppData] = useState(INITIAL_WHATSAPP_DATA);
+
+    // Dirtiness Logic
+    const isDirty = useMemo(() => {
+        if (activeTab === 'email') {
+            return JSON.stringify(emailData) !== JSON.stringify(INITIAL_EMAIL_DATA);
         }
-    });
+        return JSON.stringify(whatsAppData) !== JSON.stringify(INITIAL_WHATSAPP_DATA);
+    }, [emailData, whatsAppData, activeTab]);
+
+    useUnsavedChanges(isDirty);
 
     const handleSendCampaign = async () => {
         setIsSending(true);
         // Simulate Launch Sequence
         await new Promise(r => setTimeout(r, 2000));
-        setSuccessMessage(`${activeTab === 'email' ? 'Orbital' : 'Direct'} Transmission Initialized!`);
+        success(`${activeTab === 'email' ? 'Orbital' : 'Direct'} Transmission Initialized!`);
         setIsSending(false);
-        setTimeout(() => setSuccessMessage(''), 5000);
+        setLastSaved(new Date());
+    };
+
+    const handleSave = () => {
+        success('Sequence synchronized with orbital cache');
+        setLastSaved(new Date());
     };
 
     return (
@@ -61,7 +76,15 @@ export default function CampaignBuilder() {
                             <Send className="text-white -rotate-12" size={20} />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Campaign Forge</h1>
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Campaign Forge</h1>
+                                {lastSaved && (
+                                    <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-full animate-in fade-in slide-in-from-left duration-500">
+                                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Saved • {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex items-center gap-1.5 mt-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol: Multi-Channel Sync</p>
@@ -86,42 +109,26 @@ export default function CampaignBuilder() {
                 </div>
 
                 <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
-                    <button className="flex items-center gap-2 px-5 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all">
-                        <Save size={14} /> Save Sequence
-                    </button>
-                    <button
-                        onClick={handleSendCampaign}
-                        disabled={isSending}
-                        className="flex items-center gap-3 px-8 py-3 bg-orbit text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-primary-500/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                    <Button 
+                        variant="ghost" 
+                        icon={Save} 
+                        onClick={handleSave}
+                        disabled={!isDirty}
                     >
-                        {isSending ? (
-                            <>
-                                <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                Launching...
-                            </>
-                        ) : (
-                            <>
-                                <Send size={14} /> Ignition
-                            </>
-                        )}
-                    </button>
+                        Save Sequence
+                    </Button>
+                    <Button
+                        variant="primary"
+                        icon={Send}
+                        onClick={handleSendCampaign}
+                        isLoading={isSending}
+                    >
+                        Ignition
+                    </Button>
                 </div>
             </div>
 
-            {/* Transmission Alert */}
-            {successMessage && (
-                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-500">
-                    <div className="bg-slate-900 dark:bg-slate-800 text-white px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-4 border border-white/10 backdrop-blur-xl">
-                        <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                            <CheckCircle2 size={16} className="text-white" />
-                        </div>
-                        <span className="text-[12px] font-black uppercase tracking-widest">{successMessage}</span>
-                        <button onClick={() => setSuccessMessage('')} className="ml-4 p-1 hover:bg-white/10 rounded-lg transition-colors">
-                            <X size={16} />
-                        </button>
-                    </div>
-                </div>
-            )}
+            {/* Transmission Alert: Replaced by Global Toast */}
 
             <div className="flex-1 flex overflow-hidden">
                 {activeTab === 'email' ? (
