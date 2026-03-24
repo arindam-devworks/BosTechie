@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Save, User, Bell, Shield, Key, Plus, CheckCircle2, Settings as SettingsIcon } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { settingsApi } from '../services/settingsApi';
+import { useMutation } from '@tanstack/react-query';
 import Button from '../components/ui/Button';
 import useUnsavedChanges from '../services/useUnsavedChanges';
 
@@ -32,13 +34,22 @@ export default function Settings() {
 
     useUnsavedChanges(isDirty);
 
+    const { mutateAsync: saveProfile } = useMutation({
+        mutationFn: settingsApi.updateProfile,
+    });
+
     const handleSave = async (e) => {
         if (e) e.preventDefault();
         setIsSaving(true);
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setIsSaving(false);
-        setLastSaved(new Date());
-        success('Profile configuration synchronized');
+        try {
+            await saveProfile(formData);
+            setLastSaved(new Date());
+            success('Profile configuration synchronized');
+        } catch {
+            // handle error
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const tabs = [

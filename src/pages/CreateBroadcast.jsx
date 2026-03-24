@@ -6,6 +6,7 @@ import { Send, Smartphone, Mail, Users, Paperclip, Image as ImageIcon, X, FileTe
 import useUnsavedChanges from '../services/useUnsavedChanges';
 import { useToast } from '../context/ToastContext';
 import Button from '../components/ui/Button';
+import { useCampaigns } from '../hooks/useCampaigns';
 
 export default function CreateBroadcast() {
     const { success } = useToast();
@@ -65,9 +66,11 @@ export default function CreateBroadcast() {
         setValue('attachments', updated);
     };
 
+    const { createCampaign } = useCampaigns();
+
     const onSubmit = async (data) => {
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await createCampaign(data);
             success('Broadcast transmission queued in orbital buffer');
             reset({
                 channel: data.channel,

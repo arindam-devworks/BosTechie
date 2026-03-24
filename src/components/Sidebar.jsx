@@ -5,17 +5,18 @@ import {
     MessageSquare, Globe, X, Shield
 } from 'lucide-react';
 import Can from './auth/Can';
+import { ROUTES } from '../constants/routes';
 
 export default function Sidebar({ isOpen, closeSidebar, isCollapsed }) {
     const links = [
-        { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-        { to: '/contacts', icon: Users, label: 'Contacts' },
-        { to: '/broadcast', icon: Megaphone, label: 'Campaigns' },
-        { to: '/templates', icon: LayoutGrid, label: 'Email Templates' },
-        { to: '/whatsapp-templates', icon: MessageSquare, label: 'WhatsApp Templates' },
-        { to: '/history', icon: History, label: 'Campaign History' },
-        { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-        { to: '/settings', icon: Settings, label: 'Settings', permission: 'settings:view' },
+        { to: ROUTES.DASHBOARD, icon: LayoutDashboard, label: 'Dashboard' },
+        { to: ROUTES.CONTACTS, icon: Users, label: 'Contacts' },
+        { to: ROUTES.CAMPAIGNS, icon: Megaphone, label: 'Campaigns' },
+        { to: ROUTES.EMAIL_TEMPLATES, icon: LayoutGrid, label: 'Email Templates' },
+        { to: ROUTES.WHATSAPP_TEMPLATES, icon: MessageSquare, label: 'WhatsApp Templates' },
+        { to: ROUTES.CAMPAIGN_HISTORY, icon: History, label: 'Campaign History' },
+        { to: ROUTES.ANALYTICS, icon: BarChart3, label: 'Analytics' },
+        { to: ROUTES.SETTINGS, icon: Settings, label: 'Settings', permission: 'settings:view' },
     ];
 
     return (

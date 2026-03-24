@@ -1,40 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Users, Send, MessageSquareText, ThumbsUp, Activity, BarChart3 } from 'lucide-react';
 import Button from '../components/ui/Button';
+import { analyticsApi } from '../services/analyticsApi';
+import { queryKeys } from '../config/queryKeys';
 
 export default function Dashboard() {
-    const [stats, setStats] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            try {
-                setLoading(true);
-                // Simulating delay for empty state demonstration
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                setStats({
-                    totalMessagesSent: 0,
-                    totalReplies: 0,
-                    interestedLeads: 0,
-                    totalContacts: 0
-                });
-            } catch (err) {
-                setError('Failed to load dashboard data');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDashboardData();
-    }, []);
+    const { data: stats, isLoading: loading, error } = useQuery({
+        queryKey: queryKeys.analytics.overview(),
+        queryFn: () => analyticsApi.getOverview()
+    });
 
     const cards = [
-        { title: 'Total Messages Sent', value: stats?.totalMessagesSent, icon: Send, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30' },
-        { title: 'Total Replies', value: stats?.totalReplies, icon: MessageSquareText, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
-        { title: 'Interested Leads', value: stats?.interestedLeads, icon: ThumbsUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30' },
-        { title: 'Total Contacts', value: stats?.totalContacts, icon: Users, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/30' },
+        { title: 'Total Messages Sent', value: stats?.totalTransmissions, icon: Send, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30' },
+        { title: 'Total Replies', value: 0, icon: MessageSquareText, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
+        { title: 'Interested Leads', value: stats?.interactionRate, icon: ThumbsUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30' },
+        { title: 'Total Contacts', value: stats?.activeEntities, icon: Users, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/30' },
     ];
 
     return (
@@ -51,7 +31,7 @@ export default function Dashboard() {
 
             {error && (
                 <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl border border-red-100 dark:border-red-900/30">
-                    {error}
+                    {error?.message || 'Failed to load dashboard data'}
                 </div>
             )}
 

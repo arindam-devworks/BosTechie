@@ -1,4 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { contactApi } from '../services/contactApi';
+import { queryKeys } from '../config/queryKeys';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PhoneInput from 'react-phone-number-input';
@@ -19,60 +22,70 @@ import {
     UserX, AlertCircle
 } from 'lucide-react';
 
-const MOCK_CONTACTS = [
-    { id: 1, name: 'Alex Rivera', email: 'alex@orbit.com', phone: '+1234567890', country: 'USA', tags: 'VIP, Tech', createdAt: '2026-03-01' },
-    { id: 2, name: 'Sarah Chen', email: 'sarah@galaxy.io', phone: '+8612345678', country: 'China', tags: 'Enterprise', createdAt: '2026-03-02' },
-    { id: 3, name: 'Marcus Vogt', email: 'marcus@nebula.de', phone: '+491234567', country: 'Germany', tags: 'Lead', createdAt: '2026-03-03' },
-    { id: 4, name: 'Elena Rossi', email: 'elena@stellar.it', phone: '+3912345678', country: 'Italy', tags: 'Partner', createdAt: '2026-03-04' },
-    { id: 5, name: 'Kenji Sato', email: 'kenji@pulsar.jp', phone: '+8112345678', country: 'Japan', tags: 'VIP', createdAt: '2026-03-05' },
-];
-
 export default function Contacts() {
-    const [contacts, setContacts] = useState(MOCK_CONTACTS);
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingContact, setEditingContact] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [isLoading, setIsLoading] = useState(true);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [editingContact, setEditingContact] = useState(null);
     const [selectedIds, setSelectedIds] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
     const { success, error } = useToast();
     const { confirm } = useModal();
 
-    useEffect(() => {
-        // Simulate initial data fetch
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
-    }, []);
+    const { data, isLoading, isError } = useQuery({
+        queryKey: queryKeys.contacts.list({ page: currentPage, limit: itemsPerPage, search: searchTerm }),
+        queryFn: () => contactApi.getAll({ page: currentPage, limit: itemsPerPage, search: searchTerm }),
+        keepPreviousData: true,
+    });
 
     const { register, handleSubmit, reset, control, formState: { errors, isValid } } = useForm({
         resolver: zodResolver(contactSchema),
         mode: 'onChange'
     });
 
-    const filteredContacts = useMemo(() => {
-        return contacts.filter(c =>
-            c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.tags.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [contacts, searchTerm]);
+    const paginatedContacts = data?.items || [];
+    const totalPages = data?.totalPages || 1;
+    const totalContacts = data?.total || 0;
 
-    const totalPages = Math.ceil(filteredContacts.length / itemsPerPage);
-    const paginatedContacts = filteredContacts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    const handleSave = (data) => {
-        if (editingContact) {
-            setContacts(contacts.map(c => c.id === editingContact.id ? { ...c, ...data } : c));
-            success('Entity updated in protocol archive');
-        } else {
-            setContacts([...contacts, { ...data, id: Date.now(), createdAt: new Date().toISOString().split('T')[0] }]);
+    const createMutation = useMutation({
+        mutationFn: contactApi.create,
+        onSuccess: () => {
             success('New entity synchronized with Orbit');
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all() });
+            closeModal();
+        },
+        onError: () => error('Sync failed')
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, payload }) => contactApi.update(id, payload),
+        onSuccess: () => {
+            success('Entity updated in protocol archive');
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all() });
+            closeModal();
+        },
+        onError: () => error('Update failed')
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: contactApi.delete,
+        onSuccess: () => {
+            success('Entity erased from orbital records');
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all() });
+        },
+        onError: () => error('Erasure failed')
+    });
+
+    const handleSave = (formData) => {
+        if (editingContact) {
+            updateMutation.mutate({ id: editingContact.id, payload: formData });
+        } else {
+            createMutation.mutate(formData);
         }
-        closeModal();
     };
 
     const handleDelete = async (id) => {
@@ -85,8 +98,7 @@ export default function Contacts() {
         });
 
         if (confirmed) {
-            setContacts(contacts.filter(c => c.id !== id));
-            success('Entity erased from orbital records');
+            deleteMutation.mutate(id);
         }
     };
 
@@ -100,9 +112,12 @@ export default function Contacts() {
         });
 
         if (confirmed) {
-            setContacts(contacts.filter(c => !selectedIds.includes(c.id)));
-            setSelectedIds([]);
-            success(`${selectedIds.length} entities purged from system`);
+            // Ideally we'd have a bulk delete mutation, simulating loop here or single endpoint
+            Promise.all(selectedIds.map(id => contactApi.delete(id))).then(() => {
+                queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all() });
+                setSelectedIds([]);
+                success(`${selectedIds.length} entities purged from system`);
+            }).catch(() => error('Bulk erasure failed'));
         }
     };
 
@@ -130,10 +145,10 @@ export default function Contacts() {
             render: (contact) => (
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-orbit flex items-center justify-center text-white font-black text-sm shadow-md">
-                        {contact.name.charAt(0)}
+                        {contact.name?.[0] || '?'}
                     </div>
                     <div>
-                        <p className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">{contact.name}</p>
+                        <p className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">{contact.name || 'Anonymous Entity'}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                             <Calendar size={10} className="text-slate-300 dark:text-slate-600" />
                             <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Linked: {contact.createdAt}</span>
@@ -162,7 +177,7 @@ export default function Contacts() {
             render: (contact) => (
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-full text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest border border-slate-200/50 dark:border-slate-700/50">
                     <Globe size={12} className="text-primary-500" />
-                    {contact.country.label || contact.country}
+                    {contact.country?.label || contact.country || 'Unknown Sector'}
                 </div>
             )
         },
@@ -202,7 +217,7 @@ export default function Contacts() {
                     <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Fleet Management</h1>
                     <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
-                        <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Sector 7G / {contacts.length} Entities Online</p>
+                        <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Sector 7G / {totalContacts} Entities Online</p>
                     </div>
                 </div>
 
@@ -346,7 +361,7 @@ export default function Contacts() {
             {totalPages > 1 && (
                 <div className="flex items-center justify-between px-4">
                     <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                        Sector <span className="text-slate-900 dark:text-white">{(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredContacts.length)}</span> of {filteredContacts.length}
+                        Sector <span className="text-slate-900 dark:text-white">{(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalContacts)}</span> of {totalContacts}
                     </p>
                     <div className="flex items-center gap-2">
                         <Button

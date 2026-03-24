@@ -23,7 +23,7 @@ export default function WhatsAppTemplateList({ templates, selectedId, onSelect, 
                     <select
                         value={activeSector}
                         onChange={(e) => onSectorChange(e.target.value)}
-                        className="w-full bg-slate-50 border border-transparent rounded-2xl pl-11 pr-6 py-3.5 text-[12px] font-black text-slate-900 appearance-none outline-none focus:bg-white focus:border-primary-500 transition-all cursor-pointer"
+                        className="w-full bg-slate-50 dark:bg-slate-900/50 border border-transparent rounded-2xl pl-11 pr-6 py-3.5 text-[12px] font-black text-slate-900 dark:text-white appearance-none outline-none focus:bg-white dark:focus:bg-slate-950 focus:border-primary-500 transition-all cursor-pointer"
                     >
                         <option value="all">All WhatsApp Handsets</option>
                         <option value="leads">Mobile Leads</option>
@@ -49,7 +49,7 @@ export default function WhatsAppTemplateList({ templates, selectedId, onSelect, 
                         placeholder="Search sequences..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-slate-50 border border-transparent rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-bold text-slate-900 focus:bg-white focus:border-primary-500 outline-none transition-all placeholder:text-slate-400"
+                        className="w-full bg-slate-50 dark:bg-slate-900/50 border border-transparent rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-bold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-950 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                 </div>
 

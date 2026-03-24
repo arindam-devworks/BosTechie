@@ -24,7 +24,7 @@ export default function Step3VariableMapping({ data, updateData }) {
     };
 
     return (
-        <div className="max-w-3xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="max-w-3xl mx-auto mt-2 md:mt-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-sm space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Dynamic Variable Mapping</h2>
                 <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mt-2">Link Template Parameters to Contact Data</p>

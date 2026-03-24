@@ -16,10 +16,10 @@ export default function WhatsAppTemplatePreview({ selectedTemplate }) {
 
     return (
         <div className="sticky top-8 bg-slate-50 rounded-[40px] p-6 border-2 border-slate-100 shadow-inner h-[700px] flex flex-col items-center animate-in fade-in duration-500">
-            <div className="w-full flex items-center gap-3 mb-6 bg-white py-3 px-5 rounded-2xl border border-slate-200">
+            <div className="w-full flex items-center gap-3 mb-6 bg-white dark:bg-slate-900 py-3 px-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <Eye size={18} className="text-primary-500" />
                 <div>
-                    <h4 className="text-[11px] font-black uppercase text-slate-800 tracking-widest">Live Rendering</h4>
+                    <h4 className="text-[11px] font-black uppercase text-slate-800 dark:text-slate-200 tracking-widest">Live Rendering</h4>
                     <p className="text-[9px] font-bold uppercase text-slate-400 tracking-widest truncate">{selectedTemplate.name}</p>
                 </div>
             </div>

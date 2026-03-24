@@ -3,7 +3,7 @@ import { Settings, Globe, LayoutTemplate } from 'lucide-react';
 
 export default function Step1TemplateSetup({ data, updateData }) {
     return (
-        <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="max-w-2xl mx-auto mt-2 md:mt-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center mb-10">
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Template Initialization</h2>
                 <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mt-2">Establish Core Parameters for WhatsApp Campaign</p>

@@ -3,7 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
+import { authApi } from '../services/authApi';
 import { Mail, ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
+import { ROUTES } from '../constants/routes';
 
 const schema = z.object({
     email: z.string().email('Valid email is required').toLowerCase(),
@@ -11,13 +13,19 @@ const schema = z.object({
 
 export default function ForgotPassword() {
     const [submitted, setSubmitted] = useState(false);
+    const [serverError, setServerError] = useState('');
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
         resolver: zodResolver(schema)
     });
 
     const onSubmit = async (data) => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setSubmitted(true);
+        try {
+            setServerError('');
+            await authApi.forgotPassword(data.email);
+            setSubmitted(true);
+        } catch (e) {
+            setServerError(e?.message || 'Failed to initialize recovery sequence.');
+        }
     };
 
     return (
@@ -33,6 +41,12 @@ export default function ForgotPassword() {
                     <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Initialize Recovery</h3>
                     <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">Enter your Terminal ID to receive a reset link</p>
                 </div>
+
+                {serverError && (
+                    <div className="mb-6 flex items-center justify-center.p-3 rounded-2xl bg-red-50 text-red-500 text-[11px] font-bold uppercase">
+                        {serverError}
+                    </div>
+                )}
 
                 {!submitted ? (
                     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -60,7 +74,7 @@ export default function ForgotPassword() {
                             {isSubmitting ? 'Processing...' : 'Secure Recovery'}
                         </button>
 
-                        <Link to="/login" className="flex items-center justify-center gap-2 text-[11px] font-black text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white uppercase tracking-widest transition-colors">
+                        <Link to={ROUTES.LOGIN} className="flex items-center justify-center gap-2 text-[11px] font-black text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white uppercase tracking-widest transition-colors">
                             <ArrowLeft size={14} />
                             ABORT - Return to Login
                         </Link>
@@ -76,7 +90,7 @@ export default function ForgotPassword() {
                                 Check your comms for the recovery key.
                             </p>
                         </div>
-                        <Link to="/login" className="block py-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all">
+                        <Link to={ROUTES.LOGIN} className="block py-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all">
                             Back to Secure Login
                         </Link>
                     </div>

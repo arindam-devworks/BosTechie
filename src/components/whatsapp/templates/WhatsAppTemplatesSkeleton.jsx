@@ -4,7 +4,7 @@ export default function WhatsAppTemplatesSkeleton() {
     return (
         <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm animate-pulse flex flex-col h-full">
+                <div key={i} className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm animate-pulse flex flex-col h-full">
                     <div className="flex justify-between items-start mb-4">
                         <div className="w-12 h-12 rounded-2xl bg-slate-100"></div>
                         <div className="w-20 h-6 rounded-lg bg-slate-100"></div>

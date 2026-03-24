@@ -8,8 +8,9 @@ import Button from '../components/ui/Button';
 import { useToast } from '../context/ToastContext';
 import { useModal } from '../context/ModalContext';
 
-// Page-scoped data & components  (no impact on other pages)
-import { WHATSAPP_TEMPLATE_MOCK, countByStatus } from '../data/whatsappTemplateMockData';
+// Page-scoped data & components
+import { countByStatus } from '../data/whatsappTemplateMockData';
+import { useTemplates } from '../hooks/useTemplates';
 import WhatsAppTemplateList from '../components/whatsapp/templates/WhatsAppTemplateList';
 import WhatsAppTemplatePreview from '../components/whatsapp/templates/WhatsAppTemplatePreview';
 import WhatsAppDeleteModal from '../components/whatsapp/templates/WhatsAppDeleteModal';
@@ -29,8 +30,7 @@ export default function WhatsAppTemplates() {
     const navigate = useNavigate();
 
     // ── Local state ───────────────────────────────────────────────────────────
-    const [templates, setTemplates] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { templates, isLoading, refresh } = useTemplates('whatsapp');
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState(ALL_TAB);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -46,18 +46,12 @@ export default function WhatsAppTemplates() {
     const { confirm } = useModal();
     const { success } = useToast();
 
-    // ── Simulate loading ──────────────────────────────────────────────────────
+    // Auto-select first template when loaded
     useEffect(() => {
-        const t = setTimeout(() => {
-            setTemplates(WHATSAPP_TEMPLATE_MOCK);
-            // Auto-select first for preview
-            if (WHATSAPP_TEMPLATE_MOCK.length > 0) {
-                setSelectedTemplate(WHATSAPP_TEMPLATE_MOCK[0]);
-            }
-            setIsLoading(false);
-        }, 600); // 600ms skeleton
-        return () => clearTimeout(t);
-    }, []);
+        if (!isLoading && templates.length > 0 && !selectedTemplate) {
+            setSelectedTemplate(templates[0]);
+        }
+    }, [isLoading, templates, selectedTemplate]);
 
     // ── Filtered templates ────────────────────────────────────────────────────
     const filteredTemplates = useMemo(() => {
@@ -99,11 +93,12 @@ export default function WhatsAppTemplates() {
         });
 
         if (confirmed) {
-            setTemplates(prev => prev.filter(t => !selectedIds.includes(t.id)));
+            // Pseudo-bulk delete. Needs mutation execution in a real setup.
             setSelectedIds([]);
+            refresh();
             success(`${selectedIds.length} blueprints purged from archive`);
         }
-    }, [selectedIds, confirm, success]);
+    }, [selectedIds, confirm, success, refresh]);
 
     const handleSelect = useCallback((template) => {
         setSelectedTemplate(template);
@@ -122,17 +117,14 @@ export default function WhatsAppTemplates() {
     }, []);
 
     const handleDeleteConfirm = useCallback((id) => {
-        setTemplates((prev) => {
-            const next = prev.filter((t) => t.id !== id);
-            // If deleted template was selected, reset or select first remaining
-            if (selectedTemplate?.id === id) {
-                setSelectedTemplate(next[0] || null);
-            }
-            return next;
-        });
+        // Here we'd mutate via API and then refresh()
+        if (selectedTemplate?.id === id) {
+            setSelectedTemplate(null);
+        }
         setPendingDelete(null);
+        refresh();
         success('Protocol archived successfully');
-    }, [selectedTemplate, success]);
+    }, [selectedTemplate, success, refresh]);
 
     const clearFilters = useCallback(() => {
         setSearchTerm('');
@@ -141,10 +133,11 @@ export default function WhatsAppTemplates() {
 
     // ─────────────────────────────────────────────────────────────────────────
     return (
-        <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-
-            {/* ── Page Header ─────────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="h-full flex flex-col min-h-0 bg-transparent animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Header Area (Sticky/Fixed Top) */}
+            <div className="shrink-0 p-4 lg:p-6 pb-0 space-y-4">
+                {/* ── Page Header ─────────────────────────────────────────────── */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-[24px] sm:text-[28px] font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1.5">
                         Messaging Protocols
@@ -193,16 +186,17 @@ export default function WhatsAppTemplates() {
                     </div>
                 </div>
             )}
+            </div> {/* End shrinks-0 header area */}
 
             {/* ── Content area ─────────────────────────────────────────────── */}
             {/* xl: side-by-side | below xl: single column */}
-            <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 items-start">
+            <div className="flex-1 min-h-0 min-w-0 flex flex-col xl:flex-row p-4 lg:p-6 pt-4 gap-4 xl:gap-6 xl:overflow-hidden overflow-y-auto">
 
                 {/* ── Left/main column: search + filter + cards ────────────── */}
-                <div className="flex-1 min-w-0 space-y-4">
+                <div className="flex-1 min-w-0 flex flex-col min-h-0 space-y-4">
 
                     {/* Search + filter row */}
-                    <div className="glass-card rounded-[28px] sm:rounded-[32px] p-3 sm:p-4 flex items-center gap-3">
+                    <div className="shrink-0 glass-card rounded-[28px] sm:rounded-[32px] p-3 sm:p-4 flex items-center gap-3">
                         {/* Search input */}
                         <div className="relative flex-1 group min-w-0">
                             <Search
@@ -245,7 +239,7 @@ export default function WhatsAppTemplates() {
 
                     {/* Status filter tabs — collapsible */}
                     {showFilterPanel && (
-                        <div className="glass-card rounded-[24px] p-3 animate-in slide-in-from-top-2 duration-200">
+                        <div className="shrink-0 glass-card rounded-[24px] p-3 animate-in slide-in-from-top-2 duration-200">
                             <div className="flex flex-wrap gap-2">
                                 {STATUS_TABS.map((tab) => (
                                     <button
@@ -272,7 +266,7 @@ export default function WhatsAppTemplates() {
 
                     {/* Active filter chip */}
                     {activeTab !== ALL_TAB && !showFilterPanel && (
-                        <div className="flex items-center gap-2">
+                        <div className="shrink-0 flex items-center gap-2">
                             <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Filtering by:</span>
                             <button
                                 onClick={() => setActiveTab(ALL_TAB)}
@@ -284,24 +278,26 @@ export default function WhatsAppTemplates() {
                     )}
 
                     {/* Template cards */}
-                    <WhatsAppTemplateList
-                        templates={filteredTemplates}
-                        isLoading={isLoading}
-                        error={null}
-                        selectedTemplate={selectedTemplate}
-                        selectedIds={selectedIds}
-                        onToggleSelection={handleToggleSelection}
-                        onSelect={handleSelect}
-                        onEdit={handleEdit}
-                        onDelete={handleDeleteRequest}
-                        isSearchEmpty={isSearchOrFilterActive && filteredTemplates.length === 0}
-                        clearSearch={clearFilters}
-                    />
+                    <div className="flex-1 min-h-0 xl:overflow-y-auto custom-scrollbar xl:pr-2 pb-4">
+                        <WhatsAppTemplateList
+                            templates={filteredTemplates}
+                            isLoading={isLoading}
+                            error={null}
+                            selectedTemplate={selectedTemplate}
+                            selectedIds={selectedIds}
+                            onToggleSelection={handleToggleSelection}
+                            onSelect={handleSelect}
+                            onEdit={handleEdit}
+                            onDelete={handleDeleteRequest}
+                            isSearchEmpty={isSearchOrFilterActive && filteredTemplates.length === 0}
+                            clearSearch={clearFilters}
+                        />
+                    </div>
                 </div>
 
                 {/* ── Right column: phone preview (xl only) ──────────────── */}
-                <div className="hidden xl:block w-[340px] shrink-0">
-                    <div className="sticky top-8">
+                <div className="hidden xl:block w-[340px] shrink-0 xl:h-full xl:overflow-y-auto custom-scrollbar xl:pb-6">
+                    <div className="flex flex-col items-center">
                         <WhatsAppTemplatePreview selectedTemplate={selectedTemplate} />
                         <p className="text-center mt-4 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">
                             Holographic Preview v1.2

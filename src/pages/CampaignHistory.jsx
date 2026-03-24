@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useCampaigns } from '../hooks/useCampaigns';
 import {
     History, Search, Filter, Mail, MessageSquare,
     ChevronLeft, ChevronRight, Eye, RefreshCw,
@@ -8,67 +9,9 @@ import {
 import Button from '../components/ui/Button';
 import TableSkeleton from '../components/ui/TableSkeleton';
 
-const MOCK_HISTORY = [
-    {
-        id: 'CAM-001',
-        name: 'Summer Nexus Protocol',
-        channel: 'email',
-        status: 'completed',
-        recipients: 1240,
-        delivered: 1238,
-        opened: 856,
-        clicked: 245,
-        date: '2026-03-01 14:00'
-    },
-    {
-        id: 'CAM-002',
-        name: 'WhatsApp Flash Sync',
-        channel: 'whatsapp',
-        status: 'sending',
-        recipients: 500,
-        delivered: 342,
-        opened: 210,
-        clicked: 89,
-        date: '2026-03-04 09:30'
-    },
-    {
-        id: 'CAM-003',
-        name: 'Alpha Feedback Loop',
-        channel: 'email',
-        status: 'scheduled',
-        recipients: 2400,
-        delivered: 0,
-        opened: 0,
-        clicked: 0,
-        date: '2026-03-10 10:00'
-    },
-    {
-        id: 'CAM-004',
-        name: 'Retention Pulse',
-        channel: 'email',
-        status: 'failed',
-        failureReason: 'SMTP Auth rejection: Protocol breach detected in sector 7.',
-        recipients: 150,
-        delivered: 10,
-        opened: 5,
-        clicked: 2,
-        date: '2026-02-28 16:45'
-    }
-];
-
 export default function CampaignHistory() {
-    const [history, setHistory] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-
-    useEffect(() => {
-        // Simulate data loading
-        const timer = setTimeout(() => {
-            setHistory(MOCK_HISTORY);
-            setLoading(false);
-        }, 1200);
-        return () => clearTimeout(timer);
-    }, []);
+    const { campaigns: history, isLoading: loading, refresh } = useCampaigns();
 
     const filteredHistory = history.filter(h =>
         h.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -100,7 +43,7 @@ export default function CampaignHistory() {
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2 text-[28px]">Transmission Ledger</h1>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2 text-[28px]">Transmission Ledger</h1>
                     <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
                         <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em]">Sector Archive / {history.length} Sequences Recorded</p>
@@ -111,7 +54,7 @@ export default function CampaignHistory() {
                     <Button
                         variant="secondary"
                         icon={RefreshCw}
-                        onClick={() => {}}
+                        onClick={() => refresh()}
                     >
                         Sync Logs
                     </Button>
@@ -136,12 +79,12 @@ export default function CampaignHistory() {
                         placeholder="Search Sequence ID or Name..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50/50 border border-slate-200/50 rounded-2xl text-[13px] font-bold text-slate-900 placeholder-slate-400 outline-none focus:ring-2 focus:ring-primary-500/10 focus:border-primary-500/50 transition-all font-outfit"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl text-[13px] font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:ring-2 focus:ring-primary-500/10 focus:border-primary-500/50 transition-all font-outfit"
                     />
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto">
-                    <button className="flex items-center gap-2 px-4 py-3 text-[11px] font-black text-slate-500 uppercase tracking-widest hover:text-slate-900 transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-3 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-colors">
                         <Filter size={16} />
                         Filter Protocols
                     </button>
@@ -149,39 +92,39 @@ export default function CampaignHistory() {
             </div>
 
             {/* Content Area */}
-            <div className="glass-card rounded-[32px] overflow-hidden border border-white/40 min-h-[400px]">
+            <div className="glass-card rounded-[32px] overflow-hidden border border-white/40 dark:border-white/10 min-h-[400px]">
                 {loading ? (
                     <TableSkeleton columns={6} rows={6} />
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Sequence Identity</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol Type</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Sync Status</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Telemetry Metrics</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Timestamp</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Ops</th>
+                                <tr className="bg-slate-50/50 dark:bg-[rgba(255,255,255,0.03)] border-b border-slate-100 dark:border-slate-800/50">
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">Sequence Identity</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">Protocol Type</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">Sync Status</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">Telemetry Metrics</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">Timestamp</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest text-right">Ops</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-50">
+                            <tbody className="divide-y divide-slate-50 dark:divide-slate-800/20">
                                 {filteredHistory.map((campaign) => (
-                                    <tr key={campaign.id} className="group hover:bg-slate-50/30 transition-colors">
+                                    <tr key={campaign.id} className="group hover:bg-slate-50/30 dark:hover:bg-white/5 transition-colors">
                                         <td className="px-8 py-5">
                                             <div>
-                                                <p className="text-[13px] font-black text-slate-900 uppercase tracking-tighter">{campaign.name}</p>
+                                                <p className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">{campaign.name}</p>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {campaign.id}</p>
                                             </div>
                                         </td>
                                         <td className="px-8 py-5">
-                                            <div className="flex items-center gap-2 px-3 py-1 bg-white border border-slate-100 rounded-full w-fit">
-                                                {campaign.channel === 'email' ? (
+                                            <div className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full w-fit">
+                                                {campaign.type === 'email' ? (
                                                     <Mail size={12} className="text-primary-500" />
                                                 ) : (
                                                     <MessageSquare size={12} className="text-emerald-500" />
                                                 )}
-                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{campaign.channel}</span>
+                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{campaign.type}</span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-5">
@@ -203,21 +146,23 @@ export default function CampaignHistory() {
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-6">
                                                 <div className="text-center">
-                                                    <p className="text-[12px] font-black text-slate-900">{campaign.delivered}</p>
-                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Delivered</p>
+                                                    <p className="text-[12px] font-black text-slate-900 dark:text-white">{campaign.metrics?.sent || 0}</p>
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Sent</p>
                                                 </div>
                                                 <div className="text-center">
-                                                    <p className="text-[12px] font-black text-slate-900">{campaign.opened}</p>
-                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Opened</p>
+                                                    <p className="text-[12px] font-black text-slate-900 dark:text-white">{campaign.metrics?.openRate || 0}%</p>
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Open</p>
                                                 </div>
                                                 <div className="text-center">
-                                                    <p className="text-[12px] font-black text-slate-900">{campaign.clicked}</p>
-                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Clicked</p>
+                                                    <p className="text-[12px] font-black text-slate-900 dark:text-white">{campaign.metrics?.clickRate || 0}%</p>
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Click</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-8 py-5">
-                                            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-widest">{campaign.date}</p>
+                                            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-widest">
+                                                {campaign.scheduleDate ? new Date(campaign.scheduleDate).toLocaleDateString() : 'N/A'}
+                                            </p>
                                         </td>
                                         <td className="px-8 py-5 text-right">
                                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -240,13 +185,13 @@ export default function CampaignHistory() {
             {/* Pagination Controls */}
             <div className="flex items-center justify-between px-4 mt-6">
                 <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
-                    Showing <span className="text-slate-900">1 - {filteredHistory.length}</span> of {filteredHistory.length} Sequences
+                    Showing <span className="text-slate-900 dark:text-white">1 - {filteredHistory.length}</span> of {filteredHistory.length} Sequences
                 </p>
                 <div className="flex items-center gap-2">
-                    <button className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-slate-900 transition-all shadow-sm">
+                    <button className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all shadow-sm">
                         <ChevronLeft size={18} />
                     </button>
-                    <button className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-slate-900 transition-all shadow-sm">
+                    <button className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all shadow-sm">
                         <ChevronRight size={18} />
                     </button>
                 </div>

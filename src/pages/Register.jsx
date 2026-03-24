@@ -4,12 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema } from '../validations/registerSchema';
 import { sanitize, getPasswordStrength, STRENGTH_LABELS, STRENGTH_COLORS, STRENGTH_TEXT_COLORS } from '../validations/patterns';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../services/authApi';
 import { useNavigate, Link } from 'react-router-dom';
 import {
     User, Mail, Building2,
     Lock, ShieldCheck, Eye, EyeOff,
     Rocket, Fingerprint, Zap, CheckCircle2, AlertCircle, Loader2
 } from 'lucide-react';
+import { ROUTES } from '../constants/routes';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 
@@ -90,17 +92,9 @@ export default function Register() {
                 return;
             }
 
-            await new Promise((resolve) => setTimeout(resolve, 900));
-            const fakeToken = btoa(JSON.stringify({
-                email: clean.email,
-                name: `${clean.firstName} ${clean.lastName}`,
-                company: clean.companyName,
-            }));
-            login(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${fakeToken}.signature`, {
-                email: clean.email,
-                name: `${clean.firstName} ${clean.lastName}`,
-            });
-            navigate('/');
+            await authApi.signup({ ...clean, name: `${clean.firstName} ${clean.lastName}` });
+            await login(clean.email, clean.password);
+            navigate(ROUTES.DASHBOARD);
         } catch {
             setServerError('Orbital sync failed. Please try again.');
         }
@@ -406,7 +400,7 @@ export default function Register() {
 
                     <p className="mt-6 text-center text-[11px] font-black text-slate-500 uppercase tracking-widest">
                         Already Registered?{' '}
-                        <Link to="/login" className="text-primary-500 hover:text-primary-600 transition-colors ml-1 underline underline-offset-4 decoration-2">
+                        <Link to={ROUTES.LOGIN} className="text-primary-500 hover:text-primary-600 transition-colors ml-1 underline underline-offset-4 decoration-2">
                             Secure Login
                         </Link>
                     </p>

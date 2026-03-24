@@ -55,14 +55,14 @@ export default function WhatsAppPhonePreview({ data, forceRender = false }) {
 
                         {hasContent ? (
                             <div className="flex flex-col gap-1 w-full max-w-[90%] md:max-w-[85%] self-start relative animate-in zoom-in-95 slide-in-from-bottom-2 duration-500 z-10">
-                                <div className="bg-white p-1 rounded-[16px] md:rounded-[20px] rounded-tl-none shadow-xl border border-slate-100 relative w-full overflow-hidden flex flex-col">
+                                <div className="bg-white dark:bg-slate-900 p-1 rounded-[16px] md:rounded-[20px] rounded-tl-none shadow-xl border border-slate-100 dark:border-slate-800 relative w-full overflow-hidden flex flex-col">
                                     {/* Whatsapp bubble tail */}
                                     <div className="absolute left-[-6px] top-0 w-0 h-0 border-t-[12px] md:border-t-[15px] border-t-white border-l-[12px] md:border-l-[15px] border-l-transparent"></div>
 
                                     {/* Header Media / Text */}
                                     {data?.headerType === 'text' && data.headerText && (
                                         <div className="px-3 pt-3 pb-1">
-                                            <span className="text-[14px] font-bold text-slate-800">{data.headerText}</span>
+                                            <span className="text-[14px] font-bold text-slate-800 dark:text-slate-200">{data.headerText}</span>
                                         </div>
                                     )}
                                     {data?.headerType === 'image' && (
@@ -108,7 +108,7 @@ export default function WhatsAppPhonePreview({ data, forceRender = false }) {
                                     )}
 
                                     {/* Body Text */}
-                                    <div className="px-3 pb-2 pt-1 text-[13px] md:text-[14px] text-slate-800 font-medium leading-relaxed whitespace-pre-wrap break-words">
+                                    <div className="px-3 pb-2 pt-1 text-[13px] md:text-[14px] text-slate-800 dark:text-slate-200 font-medium leading-relaxed whitespace-pre-wrap break-words">
                                         {bodyText || <span className="text-slate-300 italic">Message body text...</span>}
                                     </div>
 
@@ -128,7 +128,7 @@ export default function WhatsAppPhonePreview({ data, forceRender = false }) {
 
                                 {/* Action Buttons Below Bubble */}
                                 {data?.buttons && data.buttons.map((btn, idx) => (
-                                    <div key={idx} className="bg-white px-4 py-3 rounded-2xl md:rounded-[20px] shadow-md border border-slate-100 w-full flex items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <div key={idx} className="bg-white dark:bg-slate-900 px-4 py-3 rounded-2xl md:rounded-[20px] shadow-md border border-slate-100 dark:border-slate-800 w-full flex items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                                         {btn.type === 'url' && <ExternalLink size={14} className="text-blue-500" />}
                                         {btn.type === 'call' && <PhoneCall size={14} className="text-emerald-500" />}
                                         {btn.type === 'quick_reply' && <MessageSquare size={14} className="text-primary-500" />}
@@ -150,7 +150,7 @@ export default function WhatsAppPhonePreview({ data, forceRender = false }) {
                     {/* Messenger Controls */}
                     <div className="h-16 md:h-20 bg-[#f0f2f5] px-3 md:px-5 flex items-center gap-2 md:gap-3 shrink-0 border-t border-slate-200/50">
                         <Plus className="text-slate-400 shrink-0" size={20} />
-                        <div className="flex-1 h-10 md:h-11 bg-white rounded-xl md:rounded-2xl flex items-center px-3 md:px-4 text-slate-300 text-[11px] md:text-xs font-bold border border-slate-200">
+                        <div className="flex-1 h-10 md:h-11 bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl flex items-center px-3 md:px-4 text-slate-300 dark:text-slate-600 text-[11px] md:text-xs font-bold border border-slate-200 dark:border-slate-800">
                             Terminal input...
                         </div>
                         <div className="w-10 h-10 md:w-11 md:h-11 bg-[#00a884] rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">

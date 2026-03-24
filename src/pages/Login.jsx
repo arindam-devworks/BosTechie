@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../validations/loginSchema';
@@ -6,6 +6,7 @@ import { sanitize } from '../validations/patterns';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, Globe, Sparkles, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { ROUTES } from '../constants/routes';
 
 // ─── Input class helper ───────────────────────────────────────────────────────
 function inputClass(error, touched, extraPadding = '') {
@@ -31,23 +32,26 @@ export default function Login() {
         reValidateMode: 'onChange',
     });
 
+    // Redirection Guard: If already authenticated, skip login page
+    const { isAuthenticated, loading } = useAuth();
+    useEffect(() => {
+        if (!loading && isAuthenticated) {
+            navigate(ROUTES.DASHBOARD, { replace: true });
+        }
+    }, [isAuthenticated, loading, navigate]);
+
+
     const onSubmit = useCallback(async (data) => {
         try {
             setServerError('');
             const email = sanitize(data.email);
             const password = data.password;
 
-            await new Promise((resolve) => setTimeout(resolve, 800));
-
-            if (email === 'admin@demo.com' && password === 'password123') {
-                const fakeToken = btoa(JSON.stringify({ email, name: 'Admin', role: 'admin' }));
-                login(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${fakeToken}.signature`, { email, name: 'Admin' });
-                navigate('/');
-            } else {
-                setServerError('Invalid credentials. Use admin@demo.com / password123');
-            }
-        } catch {
-            setServerError('An error occurred during secure connection');
+            // Interface with the backend-ready auth service layer via context
+            await login(email, password);
+            navigate(ROUTES.DASHBOARD);
+        } catch (error) {
+            setServerError(error?.message || 'Invalid credentials provided.');
         }
     }, [login, navigate]);
 
@@ -148,7 +152,7 @@ export default function Login() {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between ml-1">
                                 <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Secret Key (Password)</label>
-                                <Link to="/forgot-password" className="text-[10px] font-black text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 uppercase tracking-wider transition-colors">
+                                <Link to={ROUTES.FORGOT_PASSWORD} className="text-[10px] font-black text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 uppercase tracking-wider transition-colors">
                                     Lost Access?
                                 </Link>
                             </div>
@@ -213,7 +217,7 @@ export default function Login() {
 
                     <p className="mt-10 text-center text-[11px] font-black text-slate-500 uppercase tracking-widest">
                         New Entity?{' '}
-                        <Link to="/register" className="text-primary-500 hover:text-primary-600 transition-colors ml-1 underline underline-offset-4 decoration-2">
+                        <Link to={ROUTES.REGISTER} className="text-primary-500 hover:text-primary-600 transition-colors ml-1 underline underline-offset-4 decoration-2">
                             Create ID
                         </Link>
                     </p>

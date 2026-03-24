@@ -3,7 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, Link } from 'react-router-dom';
+import { authApi } from '../services/authApi';
 import { Lock, Eye, EyeOff, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { ROUTES } from '../constants/routes';
 
 const schema = z.object({
     password: z.string()
@@ -21,15 +23,23 @@ export default function ResetPassword() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [serverError, setServerError] = useState('');
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
         resolver: zodResolver(schema)
     });
 
     const onSubmit = async (data) => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setSuccess(true);
-        setTimeout(() => navigate('/login'), 3000);
+        try {
+            setServerError('');
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token') || 'dev-token';
+            await authApi.resetPassword({ token, password: data.password });
+            setSuccess(true);
+            setTimeout(() => navigate(ROUTES.LOGIN), 3000);
+        } catch (e) {
+            setServerError(e?.message || 'Failed to establish new key.');
+        }
     };
 
     return (
@@ -45,6 +55,12 @@ export default function ResetPassword() {
                     <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Reset Secret Key</h3>
                     <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">Establish a new orbital access key</p>
                 </div>
+
+                {serverError && (
+                    <div className="mb-6 flex items-center justify-center p-3 rounded-2xl bg-red-50 text-red-500 text-[11px] font-bold uppercase">
+                        {serverError}
+                    </div>
+                )}
 
                 {!success ? (
                     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>

@@ -21,9 +21,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import useUnsavedChanges from '../services/useUnsavedChanges';
+import { useTemplates } from '../hooks/useTemplates';
 import Button from '../components/ui/Button';
 import EmailDesigner from '../components/EmailDesigner';
-import TemplateGallery, { TEMPLATES } from '../components/TemplateGallery';
 
 export default function EmailTemplates() {
     const { success } = useToast();
@@ -32,6 +32,8 @@ export default function EmailTemplates() {
     const [activeBlockId, setActiveBlockId] = useState(null);
     const [activeTemplateId, setActiveTemplateId] = useState(null);
     const [isDirty, setIsDirty] = useState(false);
+
+    const { saveTemplate, isLoading: isSaving } = useTemplates('email');
 
     // Track unsaved changes
     useUnsavedChanges(isDirty);
@@ -73,9 +75,9 @@ export default function EmailTemplates() {
     };
 
     return (
-        <div className="h-[calc(100vh-2rem)] flex flex-col -m-6 bg-[#f8f9fa] overflow-hidden">
+        <div className="h-full flex flex-col bg-slate-50 dark:bg-[#0b0f19] overflow-hidden">
             {/* Context Navigation Top Bar */}
-            <div className="h-16 bg-white border-b border-gray-100 px-8 flex items-center justify-between shrink-0 shadow-sm z-30">
+            <div className="h-16 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-8 flex items-center justify-between shrink-0 shadow-sm z-30">
                 <div className="flex items-center gap-5">
                     <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
                         <Mail className="text-white" size={20} />
@@ -86,7 +88,7 @@ export default function EmailTemplates() {
                                 type="text"
                                 value={templateName}
                                 onChange={(e) => setTemplateName(e.target.value)}
-                                className="text-lg font-black text-gray-900 border-none bg-transparent focus:ring-0 p-0 w-80 placeholder-gray-300 uppercase tracking-tighter"
+                                className="text-lg font-black text-gray-900 dark:text-white border-none bg-transparent focus:ring-0 p-0 w-80 placeholder-gray-300 dark:placeholder-slate-600 uppercase tracking-tighter"
                                 placeholder="Untitled Template"
                             />
                         </div>
@@ -112,7 +114,9 @@ export default function EmailTemplates() {
                         variant="primary"
                         size="sm"
                         icon={Play}
-                        onClick={() => {
+                        isLoading={isSaving}
+                        onClick={async () => {
+                            await saveTemplate({ name: templateName, blocks });
                             success('Template architecture synchronized with Orbit');
                             setIsDirty(false);
                         }}
@@ -122,17 +126,12 @@ export default function EmailTemplates() {
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                 <EmailDesigner
                     blocks={blocks}
                     setBlocks={handleBlocksChange}
                     activeBlockId={activeBlockId}
                     setActiveBlockId={setActiveBlockId}
-                />
-
-                <TemplateGallery
-                    onLoadTemplate={loadTemplate}
-                    activeTemplateId={activeTemplateId}
                 />
             </div>
 

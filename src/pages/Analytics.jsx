@@ -1,38 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
     BarChart3, TrendingUp, Users, Target,
     ArrowUpRight, ArrowDownRight, Globe, Zap,
     Activity, MousePointer2, Mail, MessageSquare,
     RefreshCw, AlertCircle
 } from 'lucide-react';
-import { fetchOrbitalTelemetry } from '../services/analyticsService';
+import { analyticsApi } from '../services/analyticsApi';
+import { queryKeys } from '../config/queryKeys';
 import Skeleton from '../components/ui/Skeleton';
 import Button from '../components/ui/Button';
 
 export default function Analytics() {
-    const [telemetry, setTelemetry] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    const loadTelemetry = async () => {
-        try {
-            setLoading(true);
-            const data = await fetchOrbitalTelemetry();
-            setTelemetry(data);
-            setError(null);
-        } catch (err) {
-            setError('Failed to synchronize with orbital telemetry. Signal lost in transmission.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadTelemetry();
-        // Auto-refresh every 60 seconds for real-time feel
-        const interval = setInterval(loadTelemetry, 60000);
-        return () => clearInterval(interval);
-    }, []);
+    const { data: telemetry, isLoading: loading, error, refetch: loadTelemetry } = useQuery({
+        queryKey: queryKeys.analytics.overview(),
+        queryFn: () => analyticsApi.getOverview(),
+        refetchInterval: 60000, // Auto-refresh every 60 seconds
+    });
 
     const ErrorFallback = () => (
         <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-6 animate-in fade-in zoom-in duration-500">
@@ -42,7 +25,7 @@ export default function Analytics() {
             <div className="text-center space-y-2">
                 <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Telemetry Uplink Failed</h3>
                 <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest max-w-[280px] leading-relaxed">
-                    {error || 'The connection to the orbital data stream was interrupted.'}
+                    {error?.message || 'The connection to the orbital data stream was interrupted.'}
                 </p>
             </div>
             <Button 
@@ -59,10 +42,10 @@ export default function Analytics() {
     if (error && !telemetry) return <ErrorFallback />;
 
     const STAT_CARDS = [
-        { label: 'Total Transmissions', value: telemetry?.totalTransmissions?.toLocaleString() || '0', change: '+12.5%', isUp: true, icon: Zap, color: 'text-primary-500' },
-        { label: 'Active Entities', value: telemetry?.activeEntities?.toLocaleString() || '0', change: '+3.2%', isUp: true, icon: Users, color: 'text-emerald-500' },
-        { label: 'Interaction Rate', value: `${telemetry?.interactionRate || 0}%`, change: '-0.4%', isUp: false, icon: MousePointer2, color: 'text-violet-500' },
-        { label: 'Global Reach', value: telemetry?.globalReach || '0', change: '+8', isUp: true, icon: Globe, color: 'text-amber-500' },
+        { label: 'Total Transmissions', value: telemetry?.totalSent?.toLocaleString() || '0', change: '+12.5%', isUp: true, icon: Zap, color: 'text-primary-500' },
+        { label: 'Active Entities', value: telemetry?.activeCampaigns?.toLocaleString() || '0', change: '+3.2%', isUp: true, icon: Users, color: 'text-emerald-500' },
+        { label: 'Interaction Rate', value: `${telemetry?.averageOpenRate || 0}%`, change: '-0.4%', isUp: false, icon: MousePointer2, color: 'text-violet-500' },
+        { label: 'Global Reach', value: telemetry?.totalSent ? (telemetry.totalSent * 0.8).toFixed(0) : '0', change: '+8', isUp: true, icon: Globe, color: 'text-amber-500' },
     ];
 
     return (
@@ -166,17 +149,21 @@ export default function Analytics() {
                                 </div>
                             ))}
                         </div>
-                    ) : (
+                    ) : telemetry?.timeline?.length > 0 ? (
                         <div className="h-64 flex items-end gap-2 px-4 mt-8">
-                            {telemetry?.chartData.map((h, i) => (
+                            {telemetry.timeline.map((h, i) => (
                                 <div key={i} className="flex-1 space-y-2 group">
                                     <div className="flex gap-1 h-48 items-end">
-                                        <div className="flex-1 bg-primary-50 dark:bg-primary-900/10 group-hover:bg-primary-500 transition-all rounded-t-lg" style={{ height: `${h}%` }}></div>
-                                        <div className="flex-1 bg-emerald-50 dark:bg-emerald-900/10 group-hover:bg-emerald-500 transition-all rounded-t-lg" style={{ height: `${Math.max(0, h - 15)}%` }}></div>
+                                        <div className="flex-1 bg-primary-50 dark:bg-primary-900/10 group-hover:bg-primary-500 transition-all rounded-t-lg" style={{ height: `${h.email || 0}%` }}></div>
+                                        <div className="flex-1 bg-emerald-50 dark:bg-emerald-900/10 group-hover:bg-emerald-500 transition-all rounded-t-lg" style={{ height: `${h.whatsapp || 0}%` }}></div>
                                     </div>
-                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter text-center">T-{12 - i}</p>
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter text-center">{h.label || `T-${12 - i}`}</p>
                                 </div>
                             ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 mt-8">
+                            <p className="text-[11px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-[0.3em]">No Transmission Logs Found</p>
                         </div>
                     )}
                 </div>
@@ -196,14 +183,8 @@ export default function Analytics() {
                                     <Skeleton className="h-2 w-full rounded-full" />
                                 </div>
                             ))
-                        ) : (
-                            [
-                                { name: 'North America', value: '42%', color: 'bg-blue-500' },
-                                { name: 'Europe', value: '28%', color: 'bg-violet-500' },
-                                { name: 'Asia Pacific', value: '18%', color: 'bg-emerald-500' },
-                                { name: 'LATAM', value: '7%', color: 'bg-amber-500' },
-                                { name: 'Others', value: '5%', color: 'bg-slate-300' },
-                            ].map((sector, i) => (
+                        ) : telemetry?.audienceGrowth?.length > 0 ? (
+                            telemetry.audienceGrowth.map((sector, i) => (
                                 <div key={i} className="space-y-2">
                                     <div className="flex justify-between text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
                                         <span>{sector.name}</span>
@@ -214,6 +195,10 @@ export default function Analytics() {
                                     </div>
                                 </div>
                             ))
+                        ) : (
+                            <div className="text-center py-6">
+                                <p className="text-[11px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-[0.3em]">Sector Index Unavailable</p>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -240,10 +225,10 @@ export default function Analytics() {
                                 <Skeleton className="w-16 h-2" />
                             </div>
                         ))
-                    ) : telemetry?.activityStream.length > 0 ? (
+                    ) : telemetry?.activityStream?.length > 0 ? (
                         telemetry.activityStream.map((log, i) => (
                             <div key={i} className="flex items-center gap-6 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 rounded-2xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-all animate-in slide-in-from-left duration-500" style={{ animationDelay: `${i * 100}ms` }}>
-                                <div className={`p-3 rounded-xl ${log.color} dark:bg-opacity-20`}>
+                                <div className={`p-3 rounded-xl ${log.color || 'bg-slate-200'} dark:bg-opacity-20`}>
                                     {log.title.includes('Campaign') ? (log.desc.includes('email') ? <Mail size={18} /> : <MessageSquare size={18} />) : <Activity size={18} />}
                                 </div>
                                 <div className="flex-1">

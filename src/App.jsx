@@ -1,4 +1,6 @@
+import { Suspense, lazy } from 'react';
 import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
@@ -7,63 +9,85 @@ import ToastContainer from './components/ui/ToastContainer';
 import ConfirmationModal from './components/ui/ConfirmationModal';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import { ROUTES } from './constants/routes';
 
-// Pages
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import Dashboard from './pages/Dashboard';
-import Analytics from './pages/Analytics';
-import Contacts from './pages/Contacts';
-import EmailTemplates from './pages/EmailTemplates';
-import WhatsAppTemplates from './pages/WhatsAppTemplates';
-import CampaignHistory from './pages/CampaignHistory';
-import Inbox from './pages/Inbox';
-import Settings from './pages/Settings';
-import CampaignBuilder from './pages/CampaignBuilder';
-import WhatsAppTemplateBuilder from './pages/WhatsAppTemplateBuilder';
-import CreateBroadcast from './pages/CreateBroadcast';
+// Lazy Pages
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Contacts = lazy(() => import('./pages/Contacts'));
+const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
+const WhatsAppTemplates = lazy(() => import('./pages/WhatsAppTemplates'));
+const CampaignHistory = lazy(() => import('./pages/CampaignHistory'));
+const Inbox = lazy(() => import('./pages/Inbox'));
+const Settings = lazy(() => import('./pages/Settings'));
+const CampaignBuilder = lazy(() => import('./pages/CampaignBuilder'));
+const WhatsAppTemplateBuilder = lazy(() => import('./pages/WhatsAppTemplateBuilder'));
+const CreateBroadcast = lazy(() => import('./pages/CreateBroadcast'));
+const ComingSoon = lazy(() => import('./pages/ComingSoon'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const router = createBrowserRouter([
-  { path: "/login", element: <Login /> },
-  { path: "/register", element: <Register /> },
-  { path: "/forgot-password", element: <ForgotPassword /> },
-  { path: "/reset-password", element: <ResetPassword /> },
+  { path: ROUTES.LOGIN, element: <Login /> },
+  { path: ROUTES.REGISTER, element: <Register /> },
+  { path: ROUTES.FORGOT_PASSWORD, element: <ForgotPassword /> },
+  { path: ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
   {
     element: <ProtectedRoute />,
+    errorElement: <div className="p-10 text-center text-red-500 font-bold">An unexpected error occurred executing this route segment. Please try refreshing.</div>,
     children: [
       {
         element: <Layout />,
         children: [
-          { path: "/", element: <Dashboard /> },
-          { path: "/contacts", element: <Contacts /> },
-          { path: "/broadcast", element: <CampaignBuilder /> },
-          { path: "/inbox", element: <Inbox /> },
-          { path: "/templates", element: <EmailTemplates /> },
-          { path: "/whatsapp-templates", element: <WhatsAppTemplates /> },
-          { path: "/whatsapp-templates/create", element: <WhatsAppTemplateBuilder /> },
-          { path: "/history", element: <CampaignHistory /> },
-          { path: "/analytics", element: <Analytics /> },
-          { path: "/settings", element: <Settings /> }
+          { path: ROUTES.ROOT, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
+          { path: ROUTES.DASHBOARD, element: <Dashboard /> },
+          { path: ROUTES.CONTACTS, element: <Contacts /> },
+          { path: ROUTES.CAMPAIGNS, element: <CampaignBuilder /> },
+          { path: ROUTES.INBOX, element: <Inbox /> },
+          { path: ROUTES.EMAIL_TEMPLATES, element: <EmailTemplates /> },
+          { path: ROUTES.WHATSAPP_TEMPLATES, element: <WhatsAppTemplates /> },
+          { path: ROUTES.WHATSAPP_TEMPLATE_CREATE, element: <WhatsAppTemplateBuilder /> },
+          { path: ROUTES.WHATSAPP_TEMPLATE_EDIT, element: <ComingSoon /> },
+          { path: ROUTES.CAMPAIGN_HISTORY, element: <CampaignHistory /> },
+          { path: ROUTES.ANALYTICS, element: <Analytics /> },
+          { path: ROUTES.SETTINGS, element: <Settings /> },
+          { path: "*", element: <NotFound /> }
         ]
       }
     ]
-  }
+  },
+  { path: "*", element: <NotFound /> }
 ]);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
 
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <ModalProvider>
-          <ToastProvider>
-            <RouterProvider router={router} />
-            <ToastContainer />
-            <ConfirmationModal />
-          </ToastProvider>
-        </ModalProvider>
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ModalProvider>
+            <ToastProvider>
+              <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900"><div className="w-8 h-8 lg:w-12 lg:h-12 border-4 border-slate-200 dark:border-slate-800 border-t-primary-500 rounded-full animate-spin"></div></div>}>
+                <RouterProvider router={router} />
+              </Suspense>
+              <ToastContainer />
+              <ConfirmationModal />
+            </ToastProvider>
+          </ModalProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

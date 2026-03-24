@@ -80,7 +80,7 @@ export default function Inbox() {
                 searchValue={searchTerm}
                 onSearchChange={setSearchTerm}
                 searchPlaceholder="Search orbital messages..."
-                emptyStateIcon={InboxIcon}
+                emptyStateIcon={<InboxIcon size={48} className="mb-4 text-slate-300" />}
                 emptyStateMessage="Your communications buffer is currently empty. No incoming packets detected."
                 actions={
                     <Button

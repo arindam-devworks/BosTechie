@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { FileText, Plus } from 'lucide-react';
 import Button from '../../ui/Button';
+import { ROUTES } from '../../../constants/routes';
 
 export default function WhatsAppTemplatesEmptyState({ isSearchEmpty, clearSearch }) {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ export default function WhatsAppTemplatesEmptyState({ isSearchEmpty, clearSearch
                 <Button 
                     variant="primary" 
                     icon={Plus}
-                    onClick={() => navigate('/whatsapp-templates/create')}
+                    onClick={() => navigate(ROUTES.WHATSAPP_TEMPLATE_CREATE)}
                 >
                     Forge New Blueprint
                 </Button>

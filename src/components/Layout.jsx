@@ -24,12 +24,12 @@ export default function Layout() {
     };
 
     // Check if we are on a builder page to potentially enable focus mode or special layout
-    const isBuilderPage = location.pathname.includes('campaign-builder') ||
+    const isBuilderPage = location.pathname.includes('campaigns') ||
         location.pathname.includes('whatsapp-templates') ||
         location.pathname.includes('broadcast');
 
     return (
-        <div className="flex h-screen bg-[#f8f9fa] dark:bg-[#0b0f19] overflow-hidden transition-colors duration-500">
+        <div className="flex h-screen bg-slate-50 dark:bg-[#0b0f19] overflow-hidden transition-colors duration-500">
             {/* Sidebar Overlay for Mobile */}
             {sidebarOpen && (
                 <div
@@ -52,8 +52,8 @@ export default function Layout() {
                 <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary-500/5 rounded-full blur-[120px] -z-10"></div>
                 <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-violet-500/5 rounded-full blur-[100px] -z-10"></div>
 
-                <Header toggleSidebar={toggleSidebar} />
-                <main className={`flex-1 overflow-y-auto custom-scrollbar ${isBuilderPage ? 'p-0' : 'p-6 lg:p-10 pt-2'} transition-all duration-500`}>
+                <Header toggleSidebar={toggleSidebar} isBuilderPage={isBuilderPage} />
+                <main className={`flex-1 min-h-0 transition-all duration-500 ${isBuilderPage ? 'flex flex-col overflow-hidden p-0' : 'overflow-y-auto p-6 lg:p-10 pt-2 custom-scrollbar'}`}>
                     <Outlet />
                 </main>
 

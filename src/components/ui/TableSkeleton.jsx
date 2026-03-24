@@ -7,23 +7,16 @@ import Skeleton from './Skeleton';
  */
 export default function TableSkeleton({ columns = 5, rows = 5 }) {
     return (
-        <div className="w-full space-y-4 animate-pulse">
-            <div className="flex gap-4 px-6 py-4 border-b border-gray-100 dark:border-slate-800">
-                {[...Array(columns)].map((_, i) => (
-                    <div key={i} className="flex-1">
-                        <Skeleton className="h-4 w-24" />
-                    </div>
-                ))}
-            </div>
+        <>
             {[...Array(rows)].map((_, rowIndex) => (
-                <div key={rowIndex} className="flex gap-4 px-6 py-4 border-b border-gray-100 dark:border-slate-800 last:border-0">
+                <tr key={rowIndex} className="animate-pulse">
                     {[...Array(columns)].map((_, colIndex) => (
-                        <div key={colIndex} className="flex-1">
+                        <td key={colIndex} className="px-8 py-5">
                             <Skeleton className="h-4 w-full" />
-                        </div>
+                        </td>
                     ))}
-                </div>
+                </tr>
             ))}
-        </div>
+        </>
     );
 }

@@ -1,13 +1,16 @@
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { LogOut, Bell, Sun, Moon, Menu } from 'lucide-react';
+import { LogOut, Bell, Menu, Sun, Moon } from 'lucide-react';
 
-export default function Header({ toggleSidebar }) {
+export default function Header({ toggleSidebar, isBuilderPage }) {
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
 
     return (
-        <header className="h-20 glass-card mx-4 lg:mx-6 my-4 rounded-3xl flex items-center justify-between px-4 lg:px-8 z-30 transition-all duration-500 ease-in-out shrink-0">
+        <header className={isBuilderPage
+            ? "h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-6 z-30 transition-colors shrink-0"
+            : "h-16 glass-card mx-4 lg:mx-6 my-2 lg:my-3 rounded-2xl flex items-center justify-between px-4 lg:px-8 z-30 transition-all duration-500 ease-in-out shrink-0"
+        }>
             <div className="flex items-center gap-3 lg:gap-0">
                 <button
                     onClick={toggleSidebar}
@@ -24,14 +27,13 @@ export default function Header({ toggleSidebar }) {
 
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 bg-gray-50/50 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-gray-100 dark:border-slate-700">
-                    <button
+                    <button 
                         onClick={toggleTheme}
                         className="p-2 rounded-xl text-gray-400 hover:bg-white dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-all duration-300"
-                        title="Toggle System Theme"
+                        title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
                     >
                         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                     </button>
-                    <div className="w-px h-4 bg-gray-200 dark:bg-slate-600 mx-1"></div>
                     <button className="p-2 rounded-xl text-gray-400 hover:bg-white dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white relative transition-all duration-300">
                         <Bell size={18} />
                         <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary-500 orbit-glow"></span>
