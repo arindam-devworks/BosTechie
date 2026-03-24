@@ -26,7 +26,10 @@ import {
     Columns as ColumnsIcon,
     Layers as LayersIcon,
     Zap,
-    Repeat
+    Repeat,
+    Smartphone,
+    Minus,
+    MousePointer2
 } from 'lucide-react';
 
 // Import font families from the designer
