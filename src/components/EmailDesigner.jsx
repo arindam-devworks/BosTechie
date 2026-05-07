@@ -13,7 +13,8 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Undo2, Redo2, Monitor, Smartphone, Tablet, Download, Sparkles, Layers, ShieldCheck } from 'lucide-react';
+import { Undo2, Redo2, Monitor, Smartphone, Tablet, Download, Sparkles, Layers, ShieldCheck, Maximize2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import BlockLibrary from './BlockLibrary';
 import PropertyEditor from './PropertyEditor';
@@ -119,7 +120,8 @@ export const DEFAULT_CONTENT = {
     }
 };
 
-export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setActiveBlockId }) {
+export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setActiveBlockId, isEmbedded = false }) {
+    const navigate = useNavigate();
     const [previewMode, setPreviewMode] = useState('desktop');
     const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
     const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
@@ -366,6 +368,13 @@ export default function EmailDesigner({ blocks, setBlocks, activeBlockId, setAct
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {isEmbedded && (
+                            <button onClick={() => navigate('/campaigns/email-editor/draft')}
+                                className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-white dark:hover:bg-slate-600 transition-all text-[9px] font-black uppercase tracking-widest"
+                                title="Open in Full Editor">
+                                <Maximize2 size={12} /> Expand
+                            </button>
+                        )}
                         <button onClick={handleSaveTemplate}
                             className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-lg border border-primary-100 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all text-[9px] font-black uppercase tracking-widest">
                             <Download size={12} /> Sync Template

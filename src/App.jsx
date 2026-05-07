@@ -10,6 +10,7 @@ import ConfirmationModal from './components/ui/ConfirmationModal';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ROUTES } from './constants/routes';
+import { CampaignProvider } from './context/CampaignContext';
 
 // Lazy Pages
 const Login = lazy(() => import('./pages/Login'));
@@ -25,6 +26,7 @@ const CampaignHistory = lazy(() => import('./pages/CampaignHistory'));
 const Inbox = lazy(() => import('./pages/Inbox'));
 const Settings = lazy(() => import('./pages/Settings'));
 const CampaignBuilder = lazy(() => import('./pages/CampaignBuilder'));
+const EmailEditorFullPage = lazy(() => import('./pages/EmailEditorFullPage'));
 const WhatsAppTemplateBuilder = lazy(() => import('./pages/WhatsAppTemplateBuilder'));
 const CreateBroadcast = lazy(() => import('./pages/CreateBroadcast'));
 const ComingSoon = lazy(() => import('./pages/ComingSoon'));
@@ -40,12 +42,17 @@ const router = createBrowserRouter([
     errorElement: <div className="p-10 text-center text-red-500 font-bold">An unexpected error occurred executing this route segment. Please try refreshing.</div>,
     children: [
       {
-        element: <Layout />,
+        element: (
+          <CampaignProvider>
+            <Layout />
+          </CampaignProvider>
+        ),
         children: [
           { path: ROUTES.ROOT, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
           { path: ROUTES.DASHBOARD, element: <Dashboard /> },
           { path: ROUTES.CONTACTS, element: <Contacts /> },
           { path: ROUTES.CAMPAIGNS, element: <CampaignBuilder /> },
+          { path: ROUTES.EMAIL_EDITOR, element: <EmailEditorFullPage /> },
           { path: ROUTES.INBOX, element: <Inbox /> },
           { path: ROUTES.EMAIL_TEMPLATES, element: <EmailTemplates /> },
           { path: ROUTES.WHATSAPP_TEMPLATES, element: <WhatsAppTemplates /> },

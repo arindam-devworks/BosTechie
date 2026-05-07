@@ -212,19 +212,22 @@ export default function Contacts() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header Section */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Fleet Management</h1>
                     <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
+                        <div className="relative">
+                            <span className="absolute inset-0 w-2 h-2 rounded-full bg-primary-500 animate-ping opacity-75"></span>
+                            <span className="relative block w-2 h-2 rounded-full bg-primary-500 orbit-glow shadow-[0_0_8px_#3b82f6]"></span>
+                        </div>
                         <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Sector 7G / {totalContacts} Entities Online</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3 w-full lg:w-auto">
-                    <Button variant="secondary" icon={Upload} onClick={() => setIsImportModalOpen(true)}>Import CSV</Button>
-                    <Button variant="secondary" icon={Download} onClick={() => success('Fleet record exported to terminal')}>Export</Button>
-                    <Button variant="primary" icon={UserPlus} onClick={() => openModal()}>Sync New Entity</Button>
+                    <Button variant="secondary" icon={Upload} onClick={() => setIsImportModalOpen(true)} className="orbit-glow-inner">Import CSV</Button>
+                    <Button variant="secondary" icon={Download} onClick={() => success('Fleet record exported to terminal')} className="orbit-glow-inner">Export</Button>
+                    <Button variant="primary" icon={UserPlus} onClick={() => openModal()} className="orbit-glow shadow-primary-500/40">Sync New Entity</Button>
                 </div>
             </div>
 
@@ -236,48 +239,51 @@ export default function Contacts() {
 
             {/* Action Bar & Content */}
             {viewMode === 'list' ? (
-                <Table 
-                    columns={tableColumns}
-                    data={paginatedContacts}
-                    isLoading={isLoading}
-                    searchPlaceholder="Search Terminal ID, Entity or Clusters..."
-                    searchValue={searchTerm}
-                    onSearchChange={setSearchTerm}
-                    enableSelection={true}
-                    selectedIds={selectedIds}
-                    onSelectionChange={setSelectedIds}
-                    bulkActions={
-                        <Button 
-                            variant="danger" 
-                            size="sm" 
-                            icon={Trash2} 
-                            onClick={handleBulkDelete}
-                        >
-                            Execute Purge
-                        </Button>
-                    }
-                    emptyStateIcon={<UserX size={48} className="text-slate-300" />}
-                    emptyStateMessage="No entities discovered in this sector"
-                    actions={
-                        <div className="flex items-center gap-2">
-                            <div className="flex p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-100/50 dark:border-slate-700/50">
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm' : 'text-slate-400'}`}
-                                >
-                                    <ListIcon size={18} />
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm' : 'text-slate-400'}`}
-                                >
-                                    <LayoutGrid size={18} />
-                                </button>
+                <div className="glass-card rounded-[32px] overflow-hidden animate-in fade-in zoom-in-95 duration-700 delay-100 fill-mode-both">
+                    <Table 
+                        columns={tableColumns}
+                        data={paginatedContacts}
+                        isLoading={isLoading}
+                        searchPlaceholder="Search Terminal ID, Entity or Clusters..."
+                        searchValue={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        enableSelection={true}
+                        selectedIds={selectedIds}
+                        onSelectionChange={setSelectedIds}
+                        bulkActions={
+                            <Button 
+                                variant="danger" 
+                                size="sm" 
+                                icon={Trash2} 
+                                onClick={handleBulkDelete}
+                                className="orbit-glow shadow-red-500/40"
+                            >
+                                Execute Purge
+                            </Button>
+                        }
+                        emptyStateIcon={<UserX size={48} className="text-slate-300 dark:text-slate-700" />}
+                        emptyStateMessage="No entities discovered in this sector"
+                        actions={
+                            <div className="flex items-center gap-2">
+                                <div className="flex p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-200/50 dark:border-white/5">
+                                    <button
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm orbit-glow' : 'text-slate-400 hover:text-slate-200'}`}
+                                    >
+                                        <ListIcon size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm orbit-glow' : 'text-slate-400 hover:text-slate-200'}`}
+                                    >
+                                        <LayoutGrid size={18} />
+                                    </button>
+                                </div>
+                                <Button variant="ghost" size="sm" icon={Filter} className="!text-[9px] !rounded-xl">Advanced Ops</Button>
                             </div>
-                            <Button variant="ghost" size="sm" icon={Filter}>Advanced Ops</Button>
-                        </div>
-                    }
-                />
+                        }
+                    />
+                </div>
             ) : (
                 <div className="space-y-6">
                     <div className="glass-card rounded-[32px] p-4 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -309,48 +315,58 @@ export default function Contacts() {
                         </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {paginatedContacts.map((contact) => (
-                            <div key={contact.id} className="glass-card rounded-[32px] p-6 group hover:border-primary-200/50 dark:hover:border-primary-500/30 transition-all border border-transparent">
+                        {paginatedContacts.map((contact, idx) => (
+                            <div 
+                                key={contact.id} 
+                                className="glass-card rounded-[32px] p-6 group hover:scale-[1.02] hover:orbit-glow transition-all duration-500 animate-in fade-in zoom-in-95 fill-mode-both"
+                                style={{ animationDelay: `${idx * 50}ms` }}
+                            >
                                 <div className="flex justify-between items-start mb-6">
-                                    <div className="w-14 h-14 rounded-2xl bg-orbit flex items-center justify-center text-white font-black text-xl shadow-lg shadow-primary-500/10">
+                                    <div className="w-14 h-14 rounded-2xl bg-orbit flex items-center justify-center text-white font-black text-xl shadow-lg group-hover:rotate-6 transition-transform">
                                         {contact.name.charAt(0)}
                                     </div>
-                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => openModal(contact)} className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 rounded-xl transition-all">
+                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                                        <button onClick={() => openModal(contact)} className="p-2.5 text-slate-400 hover:text-primary-400 bg-white dark:bg-slate-900 shadow-lg border border-slate-100 dark:border-white/5 rounded-xl transition-all">
                                             <Edit size={16} />
                                         </button>
-                                        <button onClick={() => handleDelete(contact.id)} className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 rounded-xl transition-all">
+                                        <button onClick={() => handleDelete(contact.id)} className="p-2.5 text-slate-400 hover:text-red-400 bg-white dark:bg-slate-900 shadow-lg border border-slate-100 dark:border-white/5 rounded-xl transition-all">
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>
 
                                 <div className="mb-6">
-                                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1">{contact.name}</h3>
+                                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1 transition-colors group-hover:text-primary-500">{contact.name}</h3>
                                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                        <Globe size={12} className="text-primary-500" />
+                                        <Globe size={12} className="text-primary-500 transmission-pulse" />
                                         {contact.country.label || contact.country}
                                     </div>
                                 </div>
 
                                 <div className="space-y-3 mb-6">
                                     <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
-                                        <Mail size={14} className="text-slate-300 dark:text-slate-600 group-hover:text-primary-400 transition-colors" />
+                                        <div className="p-1.5 bg-primary-500/10 rounded-lg group-hover:orbit-glow transition-all">
+                                            <Mail size={14} className="text-primary-400" />
+                                        </div>
                                         <span className="text-[13px] font-bold truncate">{contact.email}</span>
                                     </div>
                                     <div className="flex items-center gap-3 text-slate-400 dark:text-slate-400">
-                                        <PhoneIcon size={14} className="text-slate-300 dark:text-slate-600" />
+                                        <div className="p-1.5 bg-slate-500/10 rounded-lg">
+                                            <PhoneIcon size={14} className="text-slate-400" />
+                                        </div>
                                         <span className="text-[12px] font-medium">{contact.phone}</span>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap gap-1.5">
+                                <div className="flex flex-wrap gap-2">
                                     {(Array.isArray(contact.tags) ? contact.tags : contact.tags.split(',')).map((tag, i) => (
-                                        <span key={i} className="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-tighter rounded-xl group-hover:bg-primary-50 dark:group-hover:bg-primary-900/30 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                                            {tag.trim()}
+                                        <span key={i} className="px-3 py-1 bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-tighter rounded-xl group-hover:bg-primary-500/10 group-hover:text-primary-400 group-hover:border-primary-500/20 border border-transparent transition-all">
+                                            #{tag.trim()}
                                         </span>
                                     ))}
                                 </div>
+                                {/* Scanline effect for hover */}
+                                <div className="absolute inset-0 scanline opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-[32px]" />
                             </div>
                         ))}
                     </div>

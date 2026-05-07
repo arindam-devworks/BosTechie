@@ -21,6 +21,8 @@
 
   --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+  --shadow-glow-lg: 0 0 40px rgba(59, 130, 246, 0.4);
+  --shadow-glow-inner: inset 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
 :root {
@@ -73,6 +75,64 @@ h4,
 
   .orbit-glow {
     @apply shadow-glow;
+  }
+
+  .orbit-glow-lg {
+    @apply shadow-glow-lg;
+  }
+
+  .orbit-glow-inner {
+    @apply shadow-glow-inner;
+  }
+
+  /* ─── Transmission Effects ─── */
+  .scanline {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scanline::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(59, 130, 246, 0.05) 50%,
+      transparent 100%
+    );
+    background-size: 100% 4px;
+    animation: scanline 10s linear infinite;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @keyframes scanline {
+    from { background-position: 0 0; }
+    to { background-position: 0 100%; }
+  }
+
+  .transmission-pulse {
+    animation: transmission-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes transmission-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(0.98); }
+  }
+
+  /* ─── Custom Scrollbar ─── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-200/20 dark:bg-slate-800/50 rounded-full hover:bg-primary-500/50 transition-colors;
   }
 
   /* ─── Phone Input — Orbit Design System ─── */

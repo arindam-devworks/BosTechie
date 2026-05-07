@@ -20,16 +20,16 @@ export default function Sidebar({ isOpen, closeSidebar, isCollapsed }) {
     ];
 
     return (
-        <aside className={`${isCollapsed ? 'w-20' : 'w-64 lg:w-72'} bg-slate-900/95 backdrop-blur-xl text-white flex flex-col h-full border-r border-white/5 relative z-40 transition-all duration-500 ease-in-out`}>
+        <aside className={`${isCollapsed ? 'w-20' : 'w-64 lg:w-72'} bg-slate-900/95 backdrop-blur-xl text-white flex flex-col h-full border-r border-white/5 relative z-40 transition-all duration-500 ease-in-out scanline`}>
             {/* Orbit Branding */}
             <div className={`p-6 ${isCollapsed ? 'lg:p-4' : 'lg:p-8'} flex items-center justify-between lg:justify-start`}>
                 <div className="relative group cursor-pointer">
                     {/* Inner BO */}
-                    <div className="w-12 h-12 rounded-full bg-orbit orbit-glow flex items-center justify-center text-white font-black text-xl z-20 relative transition-transform duration-500 group-hover:scale-110">
+                    <div className="w-12 h-12 rounded-full bg-orbit orbit-glow-lg flex items-center justify-center text-white font-black text-xl z-20 relative transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
                         BO
                     </div>
                     {/* Orbital Ring */}
-                    <div className="absolute inset-[-8px] border-2 border-primary-500/30 rounded-full animate-[spin_10s_linear_infinite] group-hover:border-primary-400/50"></div>
+                    <div className="absolute inset-[-8px] border-2 border-primary-500/30 rounded-full animate-[spin_10s_linear_infinite] group-hover:border-primary-400/50 group-hover:inset-[-12px] transition-all duration-500"></div>
                 </div>
                 {!isCollapsed && (
                     <div className="ml-4 overflow-hidden hidden lg:block animate-in fade-in slide-in-from-left-4 duration-500">
@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen, closeSidebar, isCollapsed }) {
                             title={link.label}
                             className={({ isActive }) =>
                                 `flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-4 p-3 ${!isCollapsed ? 'lg:px-4 lg:py-3' : ''} rounded-2xl transition-all duration-300 relative group overflow-hidden ${isActive
-                                    ? 'bg-primary-600/20 text-white orbit-glow border border-primary-500/30'
+                                    ? 'bg-primary-600/20 text-white orbit-glow border border-primary-500/30 transmission-pulse'
                                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`
                             }
@@ -73,6 +73,11 @@ export default function Sidebar({ isOpen, closeSidebar, isCollapsed }) {
                                 <span className="block lg:hidden font-bold text-[13px] uppercase tracking-wider truncate">
                                     {link.label}
                                 </span>
+                            )}
+
+                            {/* Active indicator bar */}
+                            {({ isActive }) => isActive && (
+                                <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-primary-500 rounded-r-full orbit-glow shadow-[0_0_10px_#3b82f6]" />
                             )}
                         </NavLink>
                     );

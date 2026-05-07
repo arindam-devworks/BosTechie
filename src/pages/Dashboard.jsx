@@ -19,12 +19,12 @@ export default function Dashboard() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Terminal Dashboard</h1>
                     <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mt-1">Satellite System Analysis</p>
                 </div>
-                <Button variant="secondary" icon={Activity}>
+                <Button variant="secondary" icon={Activity} className="orbit-glow-inner">
                     View Analytics Report
                 </Button>
             </div>
@@ -39,66 +39,87 @@ export default function Dashboard() {
                 {cards.map((card, idx) => {
                     const Icon = card.icon;
                     return (
-                        <div key={idx} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 flex flex-col hover:border-gray-200 dark:hover:border-slate-700 transition-colors">
+                        <div 
+                            key={idx} 
+                            className="glass-card rounded-2xl p-6 flex flex-col hover:scale-[1.02] transition-all duration-500 group animate-in fade-in zoom-in-95 duration-500 fill-mode-both"
+                            style={{ animationDelay: `${idx * 100}ms` }}
+                        >
                             <div className="flex items-center justify-between mb-4">
-                                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</span>
-                                <div className={`p-2 rounded-lg ${card.bg} ${card.color} transition-colors duration-200`}>
-                                    <Icon size={20} />
+                                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{card.title}</span>
+                                <div className={`p-3 rounded-xl ${card.bg} ${card.color} transition-all duration-500 group-hover:orbit-glow`}>
+                                    <Icon size={18} />
                                 </div>
                             </div>
                             <div className="mt-auto">
                                 {loading ? (
-                                    <div className="h-8 w-24 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
+                                    <div className="h-8 w-24 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse"></div>
                                 ) : (
-                                    <span className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-200">
+                                    <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter transition-colors duration-200">
                                         {card.value !== undefined ? card.value : '--'}
                                     </span>
                                 )}
                             </div>
+                            {/* Decorative line */}
+                            <div className="absolute bottom-0 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-primary-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                     );
                 })}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
                 {/* Placeholder for Analytics Chart 1 */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 min-h-[400px] flex flex-col transition-colors duration-200">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Delivery Performance</h2>
-                    <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-950/50 transition-colors duration-200">
+                <div className="glass-card rounded-2xl p-6 min-h-[400px] flex flex-col group relative overflow-hidden">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Delivery Performance</h2>
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary-500 orbit-glow animate-pulse" />
+                    </div>
+                    <div className="flex-1 flex flex-col items-center justify-center border border-white/5 dark:border-white/5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/30 transition-all duration-500 group-hover:bg-slate-50 dark:group-hover:bg-slate-950/50">
                         {loading ? (
-                            <div className="flex items-center gap-3 text-gray-400 dark:text-gray-500">
-                                <svg className="animate-spin h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Loading chart data...</span>
+                            <div className="flex flex-col items-center gap-4 text-slate-400 dark:text-slate-500">
+                                <div className="w-12 h-12 rounded-full border-2 border-primary-500/20 border-t-primary-500 animate-spin" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Scanning Data...</span>
                             </div>
                         ) : (
-                            <div className="text-center text-gray-500 dark:text-gray-400">
-                                <Activity size={32} className="mx-auto mb-3 text-gray-400 dark:text-gray-500" />
-                                <p>No analytics data available yet</p>
-                                <p className="text-sm">Start broadcasting to see performance metrics</p>
+                            <div className="text-center space-y-4">
+                                <div className="relative inline-block">
+                                    <Activity size={48} className="text-slate-200 dark:text-slate-800 transition-colors group-hover:text-primary-500/20" />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <BarChart3 size={20} className="text-slate-400 dark:text-slate-600 group-hover:text-primary-400 group-hover:orbit-glow" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">No signals detected</p>
+                                    <p className="text-[9px] font-bold text-slate-500 dark:text-slate-600 uppercase tracking-widest mt-1">Start broadcasting to establish link</p>
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Placeholder for Recent Activity */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 min-h-[400px] flex flex-col transition-colors duration-200">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Recent Activity</h2>
-                    <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-950/50 transition-colors duration-200">
+                <div className="glass-card rounded-2xl p-6 min-h-[400px] flex flex-col group relative overflow-hidden">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Recent Activity</h2>
+                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 orbit-glow animate-pulse" />
+                    </div>
+                    <div className="flex-1 flex flex-col items-center justify-center border border-white/5 dark:border-white/5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/30 transition-all duration-500 group-hover:bg-slate-50 dark:group-hover:bg-slate-950/50">
                         {loading ? (
-                            <div className="flex items-center gap-3 text-gray-400 dark:text-gray-500">
-                                <svg className="animate-spin h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Loading activity feed...</span>
+                            <div className="flex flex-col items-center gap-4 text-slate-400 dark:text-slate-500">
+                                <div className="w-12 h-12 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Retrieving Logs...</span>
                             </div>
                         ) : (
-                            <div className="text-center text-gray-500 dark:text-gray-400">
-                                <MessageSquareText size={32} className="mx-auto mb-3 text-gray-400 dark:text-gray-500" />
-                                <p>Your recent activity feed is empty</p>
+                            <div className="text-center space-y-4">
+                                <div className="relative inline-block">
+                                    <MessageSquareText size={48} className="text-slate-200 dark:text-slate-800 transition-colors group-hover:text-indigo-500/20" />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-2 h-2 rounded-full bg-slate-400 dark:text-slate-600 group-hover:bg-indigo-400 group-hover:orbit-glow" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Frequency is silent</p>
+                                    <p className="text-[9px] font-bold text-slate-500 dark:text-slate-600 uppercase tracking-widest mt-1">Your recent activity feed is empty</p>
+                                </div>
                             </div>
                         )}
                     </div>
